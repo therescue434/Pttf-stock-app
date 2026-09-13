@@ -192,11 +192,11 @@
   <script>
     // ข้อมูลจำลองตั้งต้น (อ้างอิงจากระบบจัดการสต๊อก_v2.csv)
     let inventory = [
-      { id: 2, name: "กล่องข่าว 1 ช่อง(500ชิ้น)", exist: 21, in: 0, out: 0, balance: 10500, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 3, name: "กล่องข้าว 3 ช่อง(150ชิ้น)", exist: 9, in: 66, out: 0, balance: 11250, unit: "ใบ", date: "10/09/69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
-      { id: 4, name: "ข้าวสาร 5 kg.(มาบุญครอง)", exist: 7, in: 0, out: 0, balance: 7, unit: "ถุง", date: "-", operator: "-", remark: "" },
-      { id: 5, name: "ผักกาดดอง(48 ซอง)", exist: 7, in: 25, out: 0, balance: 32, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
-      { id: 6, name: "ปลากรอบ(48กระป๋อง)", exist: 12, in: 25, out: 0, balance: 37, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
+      { id: 2, name: "กล่องข้าว 1 ช่อง ( 500 ชิ้น )", exist: 21, in: 0, out: 0, balance: 10500, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
+      { id: 3, name: "กล่องข้าว 3 ช่อง ( 150ชิ้น )", exist: 9, in: 66, out: 0, balance: 11250, unit: "ใบ", date: "10/09/69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
+      { id: 4, name: "ข้าวสาร 5 kg.( มาบุญครอง )", exist: 7, in: 0, out: 0, balance: 7, unit: "ถุง", date: "-", operator: "-", remark: "" },
+      { id: 5, name: "ผักกาดดอง ( 48 ซอง )", exist: 7, in: 25, out: 0, balance: 32, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
+      { id: 6, name: "ปลากรอบ ( 48 กระป๋อง )", exist: 12, in: 25, out: 0, balance: 37, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
       { id: 7, name: "น้ำมัน", exist: 7, in: 0, out: 0, balance: 7, unit: "ขวด", date: "-", operator: "-", remark: "" },
       { id: 8, name: "น้ำมันหอย", exist: 6, in: 0, out: 0, balance: 6, unit: "ขวด", date: "-", operator: "-", remark: "" },
       { id: 9, name: "น้ำปลา", exist: 17, in: 0, out: 0, balance: 17, unit: "แพ็ค", date: "-", operator: "-", remark: "" },
@@ -227,7 +227,8 @@
       { id: 34, name: "เครื่องบดเนื้อ (ใหญ่ )", exist: 2, in: 0, out: 0, balance: 2, unit: "เครื่อง", date: "-", operator: "-", remark: "" },
       { id: 35, name: "เครื่องบดเนื้อ ( เล็ก )", exist: 1, in: 0, out: 0, balance: 1, unit: "เครื่อง", date: "-", operator: "-", remark: "" },
       { id: 36, name: "ถังแก๊ส 48 kg (ใหญ่ )", exist: 1, in: 0, out: 0, balance: 1, unit: "ถัง", date: "-", operator: "-", remark: "" },
-      { id: 37, name: "เตาเคลื่อนที่ ( ปป )", exist: 2, in: 0, out: 0, balance: 2, unit: "เตา", date: "-", operator: "-", remark: "" }
+      { id: 37, name: "เตาเคลื่อนที่ ( ปป )", exist: 2, in: 0, out: 0, balance: 2, unit: "เตา", date: "-", operator: "-", remark: "" },
+      { id: 38, name: "เทส", exist: 0, in: 0, out: 0, balance: 0, unit: "หน่วย", date: "-", operator: "-", remark: "" }
     ];
 
     function renderTable() {
