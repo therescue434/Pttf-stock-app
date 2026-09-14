@@ -140,7 +140,8 @@
         </table>
       </div>
     </div>
-     <!-- ================= ตารางแสดงประวัติ LOG ================= -->
+
+    <!-- ================= ตารางแสดงประวัติ LOG ================= -->
     <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: sans-serif;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0; font-size: 18px; color: #1f2937; font-weight: bold;">📜 ประวัติการรับเข้า - เบิกออก (Inventory Log)</h3>
@@ -220,9 +221,8 @@
   </div>
 
   <script>
-    // ข้อมูลจำลองตั้งต้น (อ้างอิงจากระบบจัดการสต๊อก_v2.csv)
+    // ข้อมูลตั้งต้นระบบสต๊อก
     let inventory = JSON.parse(localStorage.getItem('inventory')) || [
-
       { id: 2, name: "กล่องข้าว 1 ช่อง ( 500 ชิ้น )", exist: 21, in: 0, out: 0, balance: 10500, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
       { id: 3, name: "กล่องข้าว 3 ช่อง ( 150ชิ้น )", exist: 9, in: 66, out: 0, balance: 11250, unit: "ใบ", date: "10/09/69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
       { id: 4, name: "ข้าวสาร 5 kg.( มาบุญครอง )", exist: 7, in: 0, out: 0, balance: 7, unit: "ถุง", date: "-", operator: "-", remark: "" },
@@ -261,8 +261,8 @@
       { id: 37, name: "เตาเคลื่อนที่ ( ปป )", exist: 2, in: 0, out: 0, balance: 2, unit: "เตา", date: "-", operator: "-", remark: "" },
       { id: 38, name: "เทส", exist: 0, in: 100, out: 0, balance: 0, unit: "หน่วย", date: "date.now", operator: "-", remark: "" }
     ];
-    let inventoryLogs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
 
+    let inventoryLogs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
 
     function renderTable() {
       const tbody = document.getElementById('stockTableBody');
@@ -270,17 +270,15 @@
       const status = document.getElementById('statusFilter').value;
 
       tbody.innerHTML = '';
-      
       let countTotal = 0, countNormal = 0, countLow = 0, countOut = 0;
 
-      inventory.forEach(item => {
+      inventory.forEach((item, index) => {
         countTotal++;
         if (item.balance === 0) countOut++;
         else if (item.balance <= 3) countLow++;
         else countNormal++;
 
-        // Filter Conditions
-        const matchesSearch = item.name.toLowerCase().includes(search) || item.remark.toLowerCase().includes(search);
+        const matchesSearch = item.name.toLowerCase().includes(search) || (item.remark && item.remark.toLowerCase().includes(search));
         let matchesStatus = true;
         if (status === 'normal') matchesStatus = item.balance > 3;
         if (status === 'low') matchesStatus = item.balance > 0 && item.balance <= 3;
@@ -292,56 +290,50 @@
           else if (item.balance <= 3) badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
 
           const row = `
-            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-              <td class="p-3 text-center text-slate-400 font-medium">${item.id}</td>
-              <td class="p-3 font-semibold text-slate-800">${item.name}</td>
-              <td class="p-3 text-right text-slate-500">${item.exist ? item.exist.toLocaleString() : '-'}</td>
-              <td class="p-3 text-right text-emerald-600 font-medium">${item.in ? '+' + item.in.toLocaleString() : '-'}</td>
-              <td class="p-3 text-right text-amber-600 font-medium">${item.out ? '-' + item.out.toLocaleString() : '-'}</td>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="p-3 text-center text-slate-400 font-medium">${index + 1}</td>
+              <td class="p-3 font-medium text-slate-800">${item.name}</td>
+              <td class="p-3 text-right text-slate-600">${item.exist} ${item.unit}</td>
+              <td class="p-3 text-right text-emerald-600 font-medium">${item.in || 0}</td>
+              <td class="p-3 text-right text-amber-600 font-medium">${item.out || 0}</td>
               <td class="p-3 text-right">
-                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs border ${badgeStyle}">
-                  ${item.balance.toLocaleString()} ${item.unit}
+                <span class="inline-block px-2.5 py-1 rounded-full text-xs border ${badgeStyle}">
+                  ${item.balance} ${item.unit}
                 </span>
               </td>
-              <td class="p-3 text-slate-500 text-xs">${item.date}</td>
-              <td class="p-3 text-slate-700 font-medium text-xs">${item.operator}</td>
-              <td class="p-3 text-slate-500 text-xs">${item.remark || '-'}</td>
+              <td class="p-3 text-slate-500 text-xs">${item.date || '-'}</td>
+              <td class="p-3 text-slate-700 text-xs">${item.operator || '-'}</td>
+              <td class="p-3 text-slate-500 text-xs">${item.remark || ''}</td>
             </tr>
           `;
           tbody.innerHTML += row;
         }
       });
 
-      // Update Dashboard Numbers
+      // Update Counter
       document.getElementById('stat-total').innerText = countTotal;
       document.getElementById('stat-normal').innerText = countNormal;
       document.getElementById('stat-low').innerText = countLow;
       document.getElementById('stat-out').innerText = countOut;
-      document.addEventListener('DOMContentLoaded', renderTable);
-
     }
 
     function openModal(type) {
       const modal = document.getElementById('actionModal');
       const title = document.getElementById('modalTitle');
       const submitBtn = document.getElementById('submitBtn');
-      const actionType = document.getElementById('actionType');
       const select = document.getElementById('itemSelect');
 
-      actionType.value = type;
-      select.innerHTML = '<option value="">-- เลือกรายการอุปกรณ์ --</option>';
-      inventory.forEach(item => {
-        select.innerHTML += `<option value="${item.id}">${item.name} (คงเหลือ: ${item.balance} ${item.unit})</option>`;
-      });
+      document.getElementById('actionType').value = type;
+      select.innerHTML = inventory.map(item => `<option value="${item.id}">${item.name} (คงเหลือ: ${item.balance} ${item.unit})</option>`).join('');
 
       if (type === 'in') {
-        title.innerHTML = `<i class="fa-solid fa-plus-circle text-emerald-600"></i> บันทึกรับสินค้าเข้าสต๊อก`;
-        submitBtn.innerText = "บันทึกการรับเข้า";
+        title.innerHTML = `<i class="fa-solid fa-plus-circle text-emerald-600"></i> บันทึกรับเข้าสต๊อก`;
         submitBtn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow";
+        submitBtn.innerText = "บันทึกรับเข้า";
       } else {
-        title.innerHTML = `<i class="fa-solid fa-minus-circle text-amber-600"></i> บันทึกการเบิกสินค้าออก`;
-        submitBtn.innerText = "บันทึกการเบิกออก";
+        title.innerHTML = `<i class="fa-solid fa-minus-circle text-amber-600"></i> บันทึกเบิกออกสต๊อก`;
         submitBtn.className = "px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium shadow";
+        submitBtn.innerText = "บันทึกเบิกออก";
       }
 
       modal.classList.remove('hidden');
@@ -368,10 +360,8 @@
         return;
       }
 
-      // Format Date: DD/MM/YYYY (พ.ศ.)
       const now = new Date();
-      const thaiYear = now.getFullYear() + 543;
-      const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${thaiYear}`;
+      const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear() + 543}`;
 
       if (type === 'in') {
         item.in = (item.in || 0) + qty;
@@ -384,55 +374,69 @@
       item.date = dateStr;
       item.operator = operator;
       if (remark) item.remark = remark;
-      
-      // บันทึกข้อมูลลง LocalStorage 
+
+      // 1. บันทึกสต๊อกปัจจุบัน
       localStorage.setItem('inventory', JSON.stringify(inventory));
 
+      // 2. บันทึกประวัติ LOG
+      const newLog = {
+        timestamp: now.toLocaleString('th-TH'),
+        itemId: item.id,
+        itemName: item.name,
+        type: type === 'in' ? 'รับเข้า' : 'เบิกออก',
+        qty: qty,
+        balance: item.balance,
+        operator: operator,
+        remark: remark || '-'
+      };
+      inventoryLogs.unshift(newLog);
+      localStorage.setItem('inventory_logs', JSON.stringify(inventoryLogs));
+
       renderTable();
+      renderLogTable();
       closeModal();
     }
 
+    function renderLogTable() {
+      const logTbody = document.getElementById('logTableBody');
+      if (!logTbody) return;
+
+      const logs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
+
+      if (logs.length === 0) {
+        logTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #9ca3af;">ยังไม่มีประวัติการทำรายการ</td></tr>`;
+        return;
+      }
+
+      logTbody.innerHTML = logs.map(log => {
+        const isIn = log.type === 'รับเข้า';
+        const badgeStyle = isIn 
+          ? 'background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;' 
+          : 'background-color: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;';
+
+        return `
+          <tr style="border-bottom: 1px solid #f3f4f6;">
+            <td style="padding: 12px; color: #4b5563;">${log.timestamp}</td>
+            <td style="padding: 12px; font-weight: 600; color: #111827;">${log.itemName}</td>
+            <td style="padding: 12px;"><span style="${badgeStyle}">${log.type}</span></td>
+            <td style="padding: 12px; font-weight: bold; color: ${isIn ? '#059669' : '#dc2626'};">${isIn ? '+' : '-'}${log.qty}</td>
+            <td style="padding: 12px; color: #374151;">${log.balance}</td>
+            <td style="padding: 12px; color: #4b5563;">${log.operator}</td>
+            <td style="padding: 12px; color: #6b7280;">${log.remark || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function clearLogs() {
+      if (confirm('คุณต้องการลบประวัติการทำรายการทั้งหมดใช่หรือไม่?')) {
+        localStorage.removeItem('inventory_logs');
+        inventoryLogs = [];
+        renderLogTable();
+      }
+    }
+
     function exportToExcel() {
-      // ฟังก์ชันสำหรับวาดตาราง Log
-function renderLogTable() {
-  const logTbody = document.getElementById('logTableBody');
-  if (!logTbody) return;
-
-  const logs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
-
-  if (logs.length === 0) {
-    logTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #9ca3af;">ยังไม่มีประวัติการทำรายการ</td></tr>`;
-    return;
-  }
-
-  logTbody.innerHTML = logs.map(log => {
-    const isIn = log.type === 'รับเข้า';
-    const badgeStyle = isIn 
-      ? 'background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;' 
-      : 'background-color: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;';
-
-    return `
-      <tr style="border-bottom: 1px solid #f3f4f6;">
-        <td style="padding: 12px; color: #4b5563;">${log.timestamp}</td>
-        <td style="padding: 12px; font-weight: 600; color: #111827;">${log.itemName}</td>
-        <td style="padding: 12px;"><span style="${badgeStyle}">${log.type}</span></td>
-        <td style="padding: 12px; font-weight: bold; color: ${isIn ? '#059669' : '#dc2626'};">${isIn ? '+' : '-'}${log.qty}</td>
-        <td style="padding: 12px; color: #374151;">${log.balance}</td>
-        <td style="padding: 12px; color: #4b5563;">${log.operator}</td>
-        <td style="padding: 12px; color: #6b7280;">${log.remark || '-'}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
-// ฟังก์ชันลบประวัติ
-function clearLogs() {
-  if (confirm('คุณต้องการลบประวัติการทำรายการทั้งหมดใช่หรือไม่?')) {
-    localStorage.removeItem('inventory_logs');
-    renderLogTable();
-  }
-}
-
       const exportData = inventory.map(item => ({
         'ลำดับ': item.id,
         'ชื่อวัสดุ-อุปกรณ์': item.name,
@@ -448,12 +452,16 @@ function clearLogs() {
 
       const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Stock_ Report");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Stock_Report");
+      XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
       XLSX.writeFile(workbook, `รายงานสต๊อก_กู้ภัย_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', renderTable);
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable();
+      renderLogTable();
+    });
   </script>
 </body>
-  </html>
+</html>
+
