@@ -140,6 +140,36 @@
         </table>
       </div>
     </div>
+     <!-- ================= ตารางแสดงประวัติ LOG ================= -->
+    <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: sans-serif;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 18px; color: #1f2937; font-weight: bold;">📜 ประวัติการรับเข้า - เบิกออก (Inventory Log)</h3>
+        <button type="button" onclick="clearLogs()" style="background-color: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;">
+          ล้างประวัติทั้งหมด
+        </button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+          <thead>
+            <tr style="background-color: #f3f4f6; color: #374151; border-bottom: 2px solid #e5e7eb;">
+              <th style="padding: 12px;">วัน-เวลา</th>
+              <th style="padding: 12px;">ชื่อรายการ</th>
+              <th style="padding: 12px;">ประเภท</th>
+              <th style="padding: 12px;">จำนวน</th>
+              <th style="padding: 12px;">คงเหลือ</th>
+              <th style="padding: 12px;">ผู้ดำเนินการ</th>
+              <th style="padding: 12px;">หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody">
+            <!-- ข้อมูล Log จะถูกแสดงตรงนี้ -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- ======================================================== -->
+ 
   </main>
 
   <!-- Modal Form (In / Out) -->
@@ -231,6 +261,8 @@
       { id: 37, name: "เตาเคลื่อนที่ ( ปป )", exist: 2, in: 0, out: 0, balance: 2, unit: "เตา", date: "-", operator: "-", remark: "" },
       { id: 38, name: "เทส", exist: 0, in: 100, out: 0, balance: 0, unit: "หน่วย", date: "date.now", operator: "-", remark: "" }
     ];
+    let inventoryLogs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
+
 
     function renderTable() {
       const tbody = document.getElementById('stockTableBody');
@@ -359,6 +391,46 @@
     }
 
     function exportToExcel() {
+      // ฟังก์ชันสำหรับวาดตาราง Log
+function renderLogTable() {
+  const logTbody = document.getElementById('logTableBody');
+  if (!logTbody) return;
+
+  const logs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
+
+  if (logs.length === 0) {
+    logTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #9ca3af;">ยังไม่มีประวัติการทำรายการ</td></tr>`;
+    return;
+  }
+
+  logTbody.innerHTML = logs.map(log => {
+    const isIn = log.type === 'รับเข้า';
+    const badgeStyle = isIn 
+      ? 'background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;' 
+      : 'background-color: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;';
+
+    return `
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 12px; color: #4b5563;">${log.timestamp}</td>
+        <td style="padding: 12px; font-weight: 600; color: #111827;">${log.itemName}</td>
+        <td style="padding: 12px;"><span style="${badgeStyle}">${log.type}</span></td>
+        <td style="padding: 12px; font-weight: bold; color: ${isIn ? '#059669' : '#dc2626'};">${isIn ? '+' : '-'}${log.qty}</td>
+        <td style="padding: 12px; color: #374151;">${log.balance}</td>
+        <td style="padding: 12px; color: #4b5563;">${log.operator}</td>
+        <td style="padding: 12px; color: #6b7280;">${log.remark || '-'}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ฟังก์ชันลบประวัติ
+function clearLogs() {
+  if (confirm('คุณต้องการลบประวัติการทำรายการทั้งหมดใช่หรือไม่?')) {
+    localStorage.removeItem('inventory_logs');
+    renderLogTable();
+  }
+}
+
       const exportData = inventory.map(item => ({
         'ลำดับ': item.id,
         'ชื่อวัสดุ-อุปกรณ์': item.name,
