@@ -317,6 +317,8 @@
       document.getElementById('stat-normal').innerText = countNormal;
       document.getElementById('stat-low').innerText = countLow;
       document.getElementById('stat-out').innerText = countOut;
+      document.addEventListener('DOMContentLoaded', renderTable);
+
     }
 
     function openModal(type) {
