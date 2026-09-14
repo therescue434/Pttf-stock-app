@@ -191,7 +191,8 @@
 
   <script>
     // ข้อมูลจำลองตั้งต้น (อ้างอิงจากระบบจัดการสต๊อก_v2.csv)
-    let inventory = [
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [
+
       { id: 2, name: "กล่องข้าว 1 ช่อง ( 500 ชิ้น )", exist: 21, in: 0, out: 0, balance: 10500, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
       { id: 3, name: "กล่องข้าว 3 ช่อง ( 150ชิ้น )", exist: 9, in: 66, out: 0, balance: 11250, unit: "ใบ", date: "10/09/69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
       { id: 4, name: "ข้าวสาร 5 kg.( มาบุญครอง )", exist: 7, in: 0, out: 0, balance: 7, unit: "ถุง", date: "-", operator: "-", remark: "" },
