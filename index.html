@@ -1,152 +1,39 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการสต็อกวัสดุ-อุปกรณ์ | มูลนิธิป่อเต็กตึ๊ง</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Sarabun) -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #f3f4f6;
-        }
-    </style>
-</head>
-<body class="min-h-screen pb-10">
-
-    <!-- Header / Navbar -->
-    <header class="bg-red-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white p-2 rounded-lg text-red-700 font-bold text-xl shadow">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">ระบบจัดการสต็อกวัสดุ-อุปกรณ์</h1>
-                    <p class="text-xs text-red-100">มูลนิธิป่อเต็กตึ๊ง / คลังอุปกรณ์ประกอบอาหาร</p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-4xl mx-auto px-4 mt-4 space-y-4">
-
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-center space-x-3">
-            <button onclick="openActionModal('in')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
-                <i class="fa-solid fa-circle-plus"></i>
-                <span>รับเข้า</span>
-            </button>
-            <button onclick="openActionModal('out')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
-                <i class="fa-solid fa-circle-minus"></i>
-                <span>เบิกออก</span>
-            </button>
-            <button onclick="exportLogs()" class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
-                <i class="fa-solid fa-file-export"></i>
-                <span>Export</span>
-            </button>
-        </div>
-
-        <!-- Inventory List Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-            <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
-                <i class="fa-solid fa-warehouse text-red-600"></i>
-                <span>รายการวัสดุ-อุปกรณ์คงคลัง</span>
-            </h2>
-
-            <div class="divide-y divide-gray-100">
-                <!-- Item 1 -->
-                <div class="py-3 flex items-center justify-between">
-                    <div>
-                        <div class="font-bold text-gray-800">เตาเคลื่อนที่ ( ปป )</div>
-                        <div class="text-xs text-gray-500">หน่วย: เตา</div>
-                    </div>
-                    <div class="flex items-center space-x-4 text-sm">
-                        <span class="text-gray-400">0</span>
-                        <span class="text-gray-400">0</span>
-                        <span class="bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full">2 เตา</span>
-                    </div>
-                </div>
-                <!-- Item 2 -->
-                <div class="py-3 flex items-center justify-between">
-                    <div>
-                        <div class="font-bold text-gray-800">เทส</div>
-                        <div class="text-xs text-gray-500">หน่วย: หน่วย</div>
-                    </div>
-                    <div class="flex items-center space-x-4 text-sm">
-                        <span class="text-emerald-600 font-semibold">100</span>
-                        <span class="text-gray-400">0</span>
-                        <span class="bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full">100 หน่วย</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Inventory Log Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-            <div class="flex items-center justify-between">
-                <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
-                    <i class="fa-solid fa-scroll text-amber-600"></i>
-                    <span>ประวัติการรับเข้า - เบิกออก (Inventory Log)</span>
-                </h2>
-                <button onclick="clearAppLogs()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">
-                    ล้างประวัติทั้งหมด
-                </button>
-            </div>
-
-            <!-- Table Responsive -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs md:text-sm" id="logTable">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200">
-                            <th class="p-2.5">วัน-เวลา</th>
-                            <th class="p-2.5">ชื่อรายการ / หมายเหตุ</th>
-                            <th class="p-2.5">ประเภท</th>
-                            <th class="p-2.5 text-center">จำนวน</th>
-                            <th class="p-2.5">พิกัด / คงเหลือ</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-gray-700" id="logTableBody">
-                        <tr id="noLogMsg">
-                            <td colspan="5" class="p-6 text-center text-gray-400">
-                                ยังไม่มีประวัติการทำรายการ
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- JavaScript สำหรับรับข้อมูล Realtime จาก DroidScript -->
+    <!-- JavaScript สำหรับจัดการ Log และเซฟข้อมูลเก่าไว้ในเครื่อง -->
     <script>
-        // ฟังก์ชันรับข้อความ Log จากแอป Android (DroidScript)
+        // เมื่อเปิดหน้าเว็บขึ้นมา ให้โหลดข้อมูล Log เก่าที่เคยบันทึกไว้ขึ้นมาแสดงทันที
+        document.addEventListener("DOMContentLoaded", function() {
+            var savedLogs = localStorage.getItem("app_gps_logs");
+            if (savedLogs) {
+                displayLogsToTable(savedLogs);
+            }
+        });
+
+        // ฟังก์ชันรับข้อความ Log จาก DroidScript
         function renderAppLogs(logString) {
             if (!logString || logString.trim() === "") return;
 
+            // บันทึก Log ลง LocalStorage เพื่อไม่ให้ข้อมูลเก่าหายเมื่อรีเฟรชหน้าเว็บ
+            localStorage.setItem("app_gps_logs", logString);
+            
+            // แสดงผลลงตาราง
+            displayLogsToTable(logString);
+        }
+
+        // ฟังก์ชันวาดแถวตาราง Log
+        function displayLogsToTable(logString) {
             var logTableBody = document.getElementById("logTableBody");
             if (!logTableBody) return;
 
-            // ล้างข้อความ "ยังไม่มีประวัติการทำรายการ"
-            logTableBody.innerHTML = "";
+            logTableBody.innerHTML = ""; // ล้างหน้าตารางเพื่อวาดใหม่จากข้อมูลทั้งหมด
 
-            // แยกข้อความแต่ละบรรทัด
             var lines = logString.trim().split("\n");
 
             lines.forEach(function(line) {
                 if (line.trim() === "") return;
 
-                // แยกข้อมูลด้วยเครื่องหมาย comma (,)
                 var cols = line.split(",");
-
                 var tr = document.createElement("tr");
-                tr.className = "hover:bg-gray-50 transition";
+                tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
 
                 if (cols.length >= 4) {
                     tr.innerHTML = `
@@ -161,7 +48,6 @@
                         <td class="p-2.5 text-gray-600">${cols[4] || '-'}</td>
                     `;
                 } else {
-                    // หากรูปแบบข้อความไม่ได้คั่นด้วยเครื่องหมาย comma ให้แสดงข้อความธรรมดา
                     tr.innerHTML = `
                         <td colspan="5" class="p-2.5 text-gray-700 font-mono">${line}</td>
                     `;
@@ -171,9 +57,10 @@
             });
         }
 
-        // ฟังก์ชันล้างประวัติหน้าเว็บ
+        // ฟังก์ชันล้างประวัติ
         function clearAppLogs() {
             if (confirm("คุณต้องการล้างประวัติที่แสดงบนหน้าเว็บใช่หรือไม่?")) {
+                localStorage.removeItem("app_gps_logs");
                 var logTableBody = document.getElementById("logTableBody");
                 if (logTableBody) {
                     logTableBody.innerHTML = `
@@ -187,16 +74,21 @@
             }
         }
 
-        // ฟังก์ชันจำลองปุ่ม Export
         function exportLogs() {
-            alert("กำลังเตรียมไฟล์ Export สำหรับดาวน์โหลด...");
+            var savedLogs = localStorage.getItem("app_gps_logs");
+            if(!savedLogs) {
+                alert("ไม่มีข้อมูล Log สำหรับ Export");
+                return;
+            }
+            var blob = new Blob([savedLogs], { type: "text/csv;charset=utf-8;" });
+            var link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "GPS_Inventory_Logs.csv";
+            link.click();
         }
 
-        // ฟังก์ชันจำลอง Modal รับเข้า/เบิกออก
         function openActionModal(type) {
             var actionName = type === 'in' ? 'รับเข้า' : 'เบิกออก';
             alert("เปิดหน้าทำรายการ: " + actionName);
         }
     </script>
-</body>
-</html>
