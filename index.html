@@ -1,467 +1,202 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบจัดการสต๊อกวัสดุ-อุปกรณ์ - มูลนิธิป่อเต็กตึ๊ง</title>
-  
-  <!-- Tailwind CSS & FontAwesome -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- XLSX Library สำหรับ Export Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-  <style>
-    body { font-family: 'Prompt', sans-serif; }
-    @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-    }
-  </style>
-</head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
-
-  <!-- Header -->
-  <header class="bg-red-700 text-white shadow-lg sticky top-0 z-40 no-print">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
-      <div class="flex items-center space-x-3">
-        <div class="bg-white p-2 rounded-lg text-red-700 shadow-md">
-          <i class="fa-solid fa-boxes-stacked text-2xl"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold leading-tight">ระบบจัดการสต๊อกวัสดุ-อุปกรณ์</h1>
-          <p class="text-xs text-red-200">มูลนิธิป่อเต็กตึ๊ง / คลังอุปกรณ์ประกอบอาหาร</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <button onclick="openModal('in')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm px-3 py-2 rounded-lg font-medium shadow flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-plus-circle"></i> รับเข้า
-        </button>
-        <button onclick="openModal('out')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm px-3 py-2 rounded-lg font-medium shadow flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-minus-circle"></i> เบิกออก
-        </button>
-        <button onclick="exportToExcel()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm px-3 py-2 rounded-lg font-medium shadow flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-file-excel"></i> Export
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 py-6">
-
-    <!-- Dashboard Counter Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 no-print">
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs text-slate-500 font-medium">รายการทั้งหมด</p>
-          <h3 id="stat-total" class="text-2xl font-bold text-slate-800">0</h3>
-        </div>
-        <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center text-lg">
-          <i class="fa-solid fa-list-check"></i>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs text-slate-500 font-medium">สต๊อกปกติ</p>
-          <h3 id="stat-normal" class="text-2xl font-bold text-emerald-600">0</h3>
-        </div>
-        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-lg">
-          <i class="fa-solid fa-circle-check"></i>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs text-slate-500 font-medium">ใกล้หมด (<= 3)</p>
-          <h3 id="stat-low" class="text-2xl font-bold text-amber-500">0</h3>
-        </div>
-        <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-lg flex items-center justify-center text-lg">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs text-slate-500 font-medium">สินค้าหมด / ชำรุด</p>
-          <h3 id="stat-out" class="text-2xl font-bold text-rose-600">0</h3>
-        </div>
-        <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-lg">
-          <i class="fa-solid fa-box-open"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filter & Search Bar -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-3 justify-between items-center no-print">
-      <div class="relative w-full md:w-80">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input type="text" id="searchInput" oninput="renderTable()" placeholder="ค้นหาชื่ออุปกรณ์ / วัตถุดิบ..." 
-               class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
-      </div>
-      
-      <div class="flex gap-2 w-full md:w-auto">
-        <select id="statusFilter" onchange="renderTable()" class="w-full md:w-auto px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
-          <option value="all">แสดงทุกสถานะ</option>
-          <option value="normal">พร้อมใช้งาน (> 3)</option>
-          <option value="low">เหลือน้อย (1 - 3)</option>
-          <option value="out">สินค้าหมด / ชำรุด (0)</option>
-        </select>
-        
-        <button onclick="window.print()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium border border-slate-300 flex items-center gap-1">
-          <i class="fa-solid fa-print"></i> พิมพ์
-        </button>
-      </div>
-    </div>
-
-    <!-- Stock Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-sm">
-          <thead>
-            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-semibold">
-              <th class="p-3 w-12 text-center">ลำดับ</th>
-              <th class="p-3">ชื่อวัสดุ-อุปกรณ์</th>
-              <th class="p-3 text-right">ที่มีอยู่เดิม</th>
-              <th class="p-3 text-right text-emerald-700">รับเข้า</th>
-              <th class="p-3 text-right text-amber-700">เบิกออก</th>
-              <th class="p-3 text-right font-bold">คงเหลือ</th>
-              <th class="p-3">วันที่ดำเนินการ</th>
-              <th class="p-3">ผู้ดำเนินการ</th>
-              <th class="p-3">หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody id="stockTableBody" class="divide-y divide-slate-100">
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ======  ตารางแสดงประวัติ LOG ====== -->
-    <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: sans-serif;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 18px; color: #1f2937; font-weight: bold;">📜 ประวัติการรับเข้า - เบิกออก (Inventory Log)</h3>
-        <button type="button" onclick="clearLogs()" style="background-color: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;">
-          ล้างประวัติทั้งหมด
-        </button>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-          <thead>
-            <tr style="background-color: #f3f4f6; color: #374151; border-bottom: 2px solid #e5e7eb;">
-              <th style="padding: 12px;">วัน-เวลา</th>
-              <th style="padding: 12px;">ชื่อรายการ</th>
-              <th style="padding: 12px;">ประเภท</th>
-              <th style="padding: 12px;">จำนวน</th>
-              <th style="padding: 12px;">คงเหลือ</th>
-              <th style="padding: 12px;">ผู้ดำเนินการ</th>
-              <th style="padding: 12px;">หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody id="logTableBody">
-            <!-- ข้อมูล Log จะถูกแสดงตรงนี้ -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- ======================================================== -->
- 
-  </main>
-
-  <!-- Modal Form (In / Out) -->
-  <div id="actionModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-
-      <h2 id="modalTitle" class="text-lg font-bold mb-4 flex items-center gap-2"></h2>
-
-      <form id="stockForm" onsubmit="handleFormSubmit(event)">
-        <input type="hidden" id="actionType">
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกรายการวัสดุ-อุปกรณ์</label>
-            <select id="itemSelect" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500">
-              <!-- Render via JS -->
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวนที่ดำเนินการ</label>
-            <input type="number" id="itemQty" min="1" required placeholder="กรอกจำนวน..." 
-                   class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500">
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้ดำเนินการ (ชื่อ / รหัส)</label>
-            <input type="text" id="operator" required placeholder="เช่น ธีรศักดิ์ (กู้ภัย 421) หรือ กู้ภัย 434" 
-                   class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500">
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ (ถ้ามี)</label>
-            <input type="text" id="remark" placeholder="เช่น ใหม่ 2, เก่า 2 หรือ ชำรุด" 
-                   class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500">
-          </div>
-        </div>
-
-        <div class="mt-6 flex justify-end gap-2">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-50">ยกเลิก</button>
-          <button type="submit" id="submitBtn" class="px-4 py-2 text-white rounded-lg text-sm font-medium shadow"></button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    // ข้อมูลตั้งต้นระบบสต๊อก
-    let inventory = JSON.parse(localStorage.getItem('inventory')) || [
-      { id: 2, name: "กล่องข้าว 1 ช่อง ( 500 ชิ้น )", exist: 21, in: 0, out: 0, balance: 10500, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 3, name: "กล่องข้าว 3 ช่อง ( 150ชิ้น )", exist: 9, in: 66, out: 0, balance: 11250, unit: "ใบ", date: "10/09/69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
-      { id: 4, name: "ข้าวสาร 5 kg.( มาบุญครอง )", exist: 7, in: 0, out: 0, balance: 7, unit: "ถุง", date: "-", operator: "-", remark: "" },
-      { id: 5, name: "ผักกาดดอง ( 48 ซอง )", exist: 7, in: 25, out: 0, balance: 32, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
-      { id: 6, name: "ปลากรอบ ( 48 กระป๋อง )", exist: 12, in: 25, out: 0, balance: 37, unit: "แพ็ค", date: "10 ก.ย. 69", operator: "ธีรศักดิ์ (กู้ภัย 421)", remark: "" },
-      { id: 7, name: "น้ำมัน", exist: 7, in: 0, out: 0, balance: 7, unit: "ขวด", date: "-", operator: "-", remark: "" },
-      { id: 8, name: "น้ำมันหอย", exist: 6, in: 0, out: 0, balance: 6, unit: "ขวด", date: "-", operator: "-", remark: "" },
-      { id: 9, name: "น้ำปลา", exist: 17, in: 0, out: 0, balance: 17, unit: "แพ็ค", date: "-", operator: "-", remark: "" },
-      { id: 10, name: "พริกไทย", exist: 2, in: 0, out: 0, balance: 2, unit: "ขวด", date: "-", operator: "-", remark: "" },
-      { id: 11, name: "น้ำตาลมิตรผล", exist: 3, in: 0, out: 0, balance: 3, unit: "ถุง", date: "-", operator: "-", remark: "" },
-      { id: 12, name: "ซอสปรุงรสฉลากเขียว", exist: 2, in: 0, out: 0, balance: 2, unit: "แกลอน", date: "-", operator: "-", remark: "" },
-      { id: 13, name: "ซึ้งนึ่ง ( ใหญ่ )", exist: 1, in: 0, out: 0, balance: 1, unit: "ชุด", date: "-", operator: "-", remark: "" },
-      { id: 14, name: "ตะแกรงตักข้าว ( ใหญ่ )", exist: 2, in: 0, out: 0, balance: 2, unit: "อัน", date: "-", operator: "-", remark: "" },
-      { id: 15, name: "ตะแกรงตักข้าว ( เล็ก )", exist: 2, in: 0, out: 0, balance: 2, unit: "อัน", date: "-", operator: "-", remark: "" },
-      { id: 16, name: "กระทะ ( ใหญ่ )", exist: 2, in: 0, out: 0, balance: 2, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 17, name: "กระทะ ( เล็ก )", exist: 2, in: 0, out: 0, balance: 2, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 18, name: "กระบวยตักสาคู", exist: 1, in: 0, out: 0, balance: 1, unit: "อัน", date: "-", operator: "-", remark: "" },
-      { id: 19, name: "ตะหลิว ( ใหญ่ )", exist: 1, in: 0, out: 0, balance: 1, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 20, name: "ตะหลิว ( เล็ก )", exist: 2, in: 0, out: 0, balance: 2, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 21, name: "หัวแก๊สรังผึ้ง", exist: 1, in: 0, out: 0, balance: 1, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 22, name: "หม้อเบอร์ 50", exist: 8, in: 0, out: 0, balance: 8, unit: "ชิ้น", date: "-", operator: "-", remark: "" },
-      { id: 23, name: "หม้อเบอร์ 55", exist: 2, in: 0, out: 0, balance: 2, unit: "ใบ", date: "-", operator: "-", remark: "เก่า" },
-      { id: 24, name: "หม้อเบอร์ 60", exist: 6, in: 0, out: 4, balance: 2, unit: "ใบ", date: "8 ก.ย. 69", operator: "สุรพล ( กู้ภัย 443 )", remark: "ใหม่ 2 , เก่า 2" },
-      { id: 25, name: "หม้อไฟ", exist: 1, in: 0, out: 0, balance: 1, unit: "ชุด", date: "-", operator: "-", remark: "" },
-      { id: 26, name: "ถ้วย+ชาม+ช้อน (กระเบื่อง)", exist: 2, in: 0, out: 0, balance: 2, unit: "ตะกร้า", date: "-", operator: "-", remark: "" },
-      { id: 27, name: "ถุงร้อน", exist: 2, in: 2, out: 0, balance: 4, unit: "แพ็ค", date: "12/9/2569", operator: "-", remark: "" },
-      { id: 28, name: "ถุงขยะ", exist: 1, in: 0, out: 0, balance: 1, unit: "แพ็ค", date: "-", operator: "-", remark: "" },
-      { id: 29, name: "ตระกร้า", exist: 50, in: 0, out: 0, balance: 50, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 30, name: "กระแป๋ง ( #15 )", exist: 2, in: 0, out: 0, balance: 2, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 31, name: "กระแป๋ง ( #13 )", exist: 5, in: 0, out: 0, balance: 5, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 32, name: "ถังคูลเลอร์น้ำสแตนเลส", exist: 2, in: 0, out: 0, balance: 2, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 33, name: "ถังดำ(พลาสสติก)", exist: 1, in: 0, out: 0, balance: 1, unit: "ใบ", date: "-", operator: "-", remark: "" },
-      { id: 34, name: "เครื่องบดเนื้อ (ใหญ่ )", exist: 2, in: 0, out: 0, balance: 2, unit: "เครื่อง", date: "-", operator: "-", remark: "" },
-      { id: 35, name: "เครื่องบดเนื้อ ( เล็ก )", exist: 1, in: 0, out: 0, balance: 1, unit: "เครื่อง", date: "-", operator: "-", remark: "" },
-      { id: 36, name: "ถังแก๊ส 48 kg (ใหญ่ )", exist: 1, in: 0, out: 0, balance: 1, unit: "ถัง", date: "-", operator: "-", remark: "" },
-      { id: 37, name: "เตาเคลื่อนที่ ( ปป )", exist: 2, in: 0, out: 0, balance: 2, unit: "เตา", date: "-", operator: "-", remark: "" },
-      { id: 38, name: "Test", exist: 0, in: 0, out: 0, balance: 0, unit: "", date: "", operator: "", remark: "" }
-    ];
-
-    let inventoryLogs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
-
-    function renderTable() {
-      const tbody = document.getElementById('stockTableBody');
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const status = document.getElementById('statusFilter').value;
-
-      tbody.innerHTML = '';
-      let countTotal = 0, countNormal = 0, countLow = 0, countOut = 0;
-
-      inventory.forEach((item, index) => {
-        countTotal++;
-        if (item.balance === 0) countOut++;
-        else if (item.balance <= 3) countLow++;
-        else countNormal++;
-
-        const matchesSearch = item.name.toLowerCase().includes(search) || (item.remark && item.remark.toLowerCase().includes(search));
-        let matchesStatus = true;
-        if (status === 'normal') matchesStatus = item.balance > 3;
-        if (status === 'low') matchesStatus = item.balance > 0 && item.balance <= 3;
-        if (status === 'out') matchesStatus = item.balance === 0;
-
-        if (matchesSearch && matchesStatus) {
-          let badgeStyle = "bg-emerald-100 text-emerald-800 border-emerald-200";
-          if (item.balance === 0) badgeStyle = "bg-rose-100 text-rose-800 border-rose-200 font-bold";
-          else if (item.balance <= 3) badgeStyle = "bg-amber-100 text-amber-800 border-amber-200 font-bold";
-
-          const row = `
-            <tr class="hover:bg-slate-50 transition">
-              <td class="p-3 text-center text-slate-400 font-medium">${index + 1}</td>
-              <td class="p-3 font-medium text-slate-800">${item.name}</td>
-              <td class="p-3 text-right text-slate-600">${item.exist} ${item.unit}</td>
-              <td class="p-3 text-right text-emerald-600 font-medium">${item.in || 0}</td>
-              <td class="p-3 text-right text-amber-600 font-medium">${item.out || 0}</td>
-              <td class="p-3 text-right">
-                <span class="inline-block px-2.5 py-1 rounded-full text-xs border ${badgeStyle}">
-                  ${item.balance} ${item.unit}
-                </span>
-              </td>
-              <td class="p-3 text-slate-500 text-xs">${item.date || '-'}</td>
-              <td class="p-3 text-slate-700 text-xs">${item.operator || '-'}</td>
-              <td class="p-3 text-slate-500 text-xs">${item.remark || ''}</td>
-            </tr>
-          `;
-          tbody.innerHTML += row;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการสต็อกวัสดุ-อุปกรณ์ | มูลนิธิป่อเต็กตึ๊ง</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Sarabun) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f3f4f6;
         }
-      });
+    </style>
+</head>
+<body class="min-h-screen pb-10">
 
-      // Update Counter
-      document.getElementById('stat-total').innerText = countTotal;
-      document.getElementById('stat-normal').innerText = countNormal;
-      document.getElementById('stat-low').innerText = countLow;
-      document.getElementById('stat-out').innerText = countOut;
-    }
+    <!-- Header / Navbar -->
+    <header class="bg-red-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-lg text-red-700 font-bold text-xl shadow">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">ระบบจัดการสต็อกวัสดุ-อุปกรณ์</h1>
+                    <p class="text-xs text-red-100">มูลนิธิป่อเต็กตึ๊ง / คลังอุปกรณ์ประกอบอาหาร</p>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    function openModal(type) {
-      const modal = document.getElementById('actionModal');
-      const title = document.getElementById('modalTitle');
-      const submitBtn = document.getElementById('submitBtn');
-      const select = document.getElementById('itemSelect');
+    <main class="max-w-4xl mx-auto px-4 mt-4 space-y-4">
 
-      document.getElementById('actionType').value = type;
-      select.innerHTML = inventory.map(item => `<option value="${item.id}">${item.name} (คงเหลือ: ${item.balance} ${item.unit})</option>`).join('');
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-center space-x-3">
+            <button onclick="openActionModal('in')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>รับเข้า</span>
+            </button>
+            <button onclick="openActionModal('out')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
+                <i class="fa-solid fa-circle-minus"></i>
+                <span>เบิกออก</span>
+            </button>
+            <button onclick="exportLogs()" class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl shadow flex items-center justify-center space-x-2 transition">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Export</span>
+            </button>
+        </div>
 
-      if (type === 'in') {
-        title.innerHTML = `<i class="fa-solid fa-plus-circle text-emerald-600"></i> บันทึกรับเข้าสต๊อก`;
-        submitBtn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow";
-        submitBtn.innerText = "บันทึกรับเข้า";
-      } else {
-        title.innerHTML = `<i class="fa-solid fa-minus-circle text-amber-600"></i> บันทึกเบิกออกสต๊อก`;
-        submitBtn.className = "px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium shadow";
-        submitBtn.innerText = "บันทึกเบิกออก";
-      }
+        <!-- Inventory List Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+                <i class="fa-solid fa-warehouse text-red-600"></i>
+                <span>รายการวัสดุ-อุปกรณ์คงคลัง</span>
+            </h2>
 
-      modal.classList.remove('hidden');
-    }
+            <div class="divide-y divide-gray-100">
+                <!-- Item 1 -->
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-gray-800">เตาเคลื่อนที่ ( ปป )</div>
+                        <div class="text-xs text-gray-500">หน่วย: เตา</div>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <span class="text-gray-400">0</span>
+                        <span class="text-gray-400">0</span>
+                        <span class="bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full">2 เตา</span>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-gray-800">เทส</div>
+                        <div class="text-xs text-gray-500">หน่วย: หน่วย</div>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <span class="text-emerald-600 font-semibold">100</span>
+                        <span class="text-gray-400">0</span>
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full">100 หน่วย</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    function closeModal() {
-      document.getElementById('actionModal').classList.add('hidden');
-      document.getElementById('stockForm').reset();
-    }
+        <!-- Inventory Log Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-scroll text-amber-600"></i>
+                    <span>ประวัติการรับเข้า - เบิกออก (Inventory Log)</span>
+                </h2>
+                <button onclick="clearAppLogs()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">
+                    ล้างประวัติทั้งหมด
+                </button>
+            </div>
 
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      const id = parseInt(document.getElementById('itemSelect').value);
-      const qty = parseInt(document.getElementById('itemQty').value);
-      const operator = document.getElementById('operator').value.trim();
-      const remark = document.getElementById('remark').value.trim();
-      const type = document.getElementById('actionType').value;
+            <!-- Table Responsive -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs md:text-sm" id="logTable">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200">
+                            <th class="p-2.5">วัน-เวลา</th>
+                            <th class="p-2.5">ชื่อรายการ / หมายเหตุ</th>
+                            <th class="p-2.5">ประเภท</th>
+                            <th class="p-2.5 text-center">จำนวน</th>
+                            <th class="p-2.5">พิกัด / คงเหลือ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700" id="logTableBody">
+                        <tr id="noLogMsg">
+                            <td colspan="5" class="p-6 text-center text-gray-400">
+                                ยังไม่มีประวัติการทำรายการ
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
+    </main>
 
-      if (type === 'out' && qty > item.balance) {
-        alert(`❌ ไม่สามารถเบิกออกได้! จำนวนที่เบิก (${qty}) มากกว่าคงเหลือในสต๊อก (${item.balance})`);
-        return;
-      }
+    <!-- JavaScript สำหรับรับข้อมูล Realtime จาก DroidScript -->
+    <script>
+        // ฟังก์ชันรับข้อความ Log จากแอป Android (DroidScript)
+        function renderAppLogs(logString) {
+            if (!logString || logString.trim() === "") return;
 
-      const now = new Date();
-      const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear() + 543}`;
+            var logTableBody = document.getElementById("logTableBody");
+            if (!logTableBody) return;
 
-      if (type === 'in') {
-        item.in = (item.in || 0) + qty;
-        item.balance += qty;
-      } else {
-        item.out = (item.out || 0) + qty;
-        item.balance -= qty;
-      }
+            // ล้างข้อความ "ยังไม่มีประวัติการทำรายการ"
+            logTableBody.innerHTML = "";
 
-      item.date = dateStr;
-      item.operator = operator;
-      if (remark) item.remark = remark;
+            // แยกข้อความแต่ละบรรทัด
+            var lines = logString.trim().split("\n");
 
-      // 1. บันทึกสต๊อกปัจจุบัน
-      localStorage.setItem('inventory', JSON.stringify(inventory));
+            lines.forEach(function(line) {
+                if (line.trim() === "") return;
 
-      // 2. บันทึกประวัติ LOG
-      const newLog = {
-        timestamp: now.toLocaleString('th-TH'),
-        itemId: item.id,
-        itemName: item.name,
-        type: type === 'in' ? 'รับเข้า' : 'เบิกออก',
-        qty: qty,
-        balance: item.balance,
-        operator: operator,
-        remark: remark || '-'
-      };
-      inventoryLogs.unshift(newLog);
-      localStorage.setItem('inventory_logs', JSON.stringify(inventoryLogs));
+                // แยกข้อมูลด้วยเครื่องหมาย comma (,)
+                var cols = line.split(",");
 
-      renderTable();
-      renderLogTable();
-      closeModal();
-    }
+                var tr = document.createElement("tr");
+                tr.className = "hover:bg-gray-50 transition";
 
-    function renderLogTable() {
-      const logTbody = document.getElementById('logTableBody');
-      if (!logTbody) return;
+                if (cols.length >= 4) {
+                    tr.innerHTML = `
+                        <td class="p-2.5 whitespace-nowrap text-gray-500">${cols[0] || '-'}</td>
+                        <td class="p-2.5 font-semibold text-gray-800">${cols[1] || '-'}</td>
+                        <td class="p-2.5">
+                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-md font-medium">
+                                ${cols[2] || 'บันทึก'}
+                            </span>
+                        </td>
+                        <td class="p-2.5 text-center font-bold text-gray-700">${cols[3] || '1'}</td>
+                        <td class="p-2.5 text-gray-600">${cols[4] || '-'}</td>
+                    `;
+                } else {
+                    // หากรูปแบบข้อความไม่ได้คั่นด้วยเครื่องหมาย comma ให้แสดงข้อความธรรมดา
+                    tr.innerHTML = `
+                        <td colspan="5" class="p-2.5 text-gray-700 font-mono">${line}</td>
+                    `;
+                }
 
-      const logs = JSON.parse(localStorage.getItem('inventory_logs')) || [];
+                logTableBody.appendChild(tr);
+            });
+        }
 
-      if (logs.length === 0) {
-        logTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #9ca3af;">ยังไม่มีประวัติการทำรายการ</td></tr>`;
-        return;
-      }
+        // ฟังก์ชันล้างประวัติหน้าเว็บ
+        function clearAppLogs() {
+            if (confirm("คุณต้องการล้างประวัติที่แสดงบนหน้าเว็บใช่หรือไม่?")) {
+                var logTableBody = document.getElementById("logTableBody");
+                if (logTableBody) {
+                    logTableBody.innerHTML = `
+                        <tr id="noLogMsg">
+                            <td colspan="5" class="p-6 text-center text-gray-400">
+                                ยังไม่มีประวัติการทำรายการ
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
 
-      logTbody.innerHTML = logs.map(log => {
-        const isIn = log.type === 'รับเข้า';
-        const badgeStyle = isIn 
-          ? 'background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;' 
-          : 'background-color: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px;';
+        // ฟังก์ชันจำลองปุ่ม Export
+        function exportLogs() {
+            alert("กำลังเตรียมไฟล์ Export สำหรับดาวน์โหลด...");
+        }
 
-        return `
-          <tr style="border-bottom: 1px solid #f3f4f6;">
-            <td style="padding: 12px; color: #4b5563;">${log.timestamp}</td>
-            <td style="padding: 12px; font-weight: 600; color: #111827;">${log.itemName}</td>
-            <td style="padding: 12px;"><span style="${badgeStyle}">${log.type}</span></td>
-            <td style="padding: 12px; font-weight: bold; color: ${isIn ? '#059669' : '#dc2626'};">${isIn ? '+' : '-'}${log.qty}</td>
-            <td style="padding: 12px; color: #374151;">${log.balance}</td>
-            <td style="padding: 12px; color: #4b5563;">${log.operator}</td>
-            <td style="padding: 12px; color: #6b7280;">${log.remark || '-'}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function clearLogs() {
-      if (confirm('คุณต้องการลบประวัติการทำรายการทั้งหมดใช่หรือไม่?')) {
-        localStorage.removeItem('inventory_logs');
-        inventoryLogs = [];
-        renderLogTable();
-      }
-    }
-
-    function exportToExcel() {
-      const exportData = inventory.map(item => ({
-        'ลำดับ': item.id,
-        'ชื่อวัสดุ-อุปกรณ์': item.name,
-        'ที่มีอยู่เดิม': item.exist,
-        'รับเข้า': item.in || 0,
-        'เบิกออก': item.out || 0,
-        'คงเหลือ': item.balance,
-        'หน่วย': item.unit,
-        'วันที่ดำเนินการ': item.date,
-        'ผู้ดำเนินการ': item.operator,
-        'หมายเหตุ': item.remark
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Stock_Report");
-      XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
-      XLSX.writeFile(workbook, `รายงานสต๊อก_กู้ภัย_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderTable();
-      renderLogTable();
-    });
-  </script>
+        // ฟังก์ชันจำลอง Modal รับเข้า/เบิกออก
+        function openActionModal(type) {
+            var actionName = type === 'in' ? 'รับเข้า' : 'เบิกออก';
+            alert("เปิดหน้าทำรายการ: " + actionName);
+        }
+    </script>
 </body>
 </html>
-
