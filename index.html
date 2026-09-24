@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>มูลนิธิป่อเต็กตึ๊ง สโตร์วัสดุ-อุปกรณ์โรงครัว</title>
+<title>ระบบจัดการสต็อก</title>
 <style>
   :root{
     --red:#c0392b;
@@ -40,7 +40,7 @@
   header p{margin:3px 0 0;font-size:.8rem;color:#fce4e0;}
   .top-actions{display:flex;gap:8px;margin-top:14px;}
   .top-actions button{
-    flex:1;padding:11px 6px;border:none;border-radius:9px;
+    flex:1;padding:11px 6px;border:none;border-radius:99px;
     font-weight:700;font-size:.86rem;display:flex;align-items:center;justify-content:center;gap:5px;
     cursor:pointer;
   }
@@ -75,7 +75,6 @@
   .badge.low{background:#f8e6e2;color:var(--red);}
   .row-name-sub{display:block;font-size:.66rem;font-weight:400;color:var(--muted);}
 
-  /* ปุ่มกดประจำแถว */
   .row-actions{display:flex;gap:4px;justify-content:center;}
   .btn-tbl-in{background:var(--green);color:#fff;border:none;border-radius:6px;padding:5px 8px;font-size:.7rem;font-weight:700;cursor:pointer;}
   .btn-tbl-out{background:var(--amber);color:#fff;border:none;border-radius:6px;padding:5px 8px;font-size:.7rem;font-weight:700;cursor:pointer;}
@@ -87,7 +86,6 @@
   .section{margin:18px 16px 0;}
   .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
   .section-head h2{margin:0;font-size:.92rem;}
-  .auth-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
   .clear-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
   
   .log-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
@@ -126,10 +124,9 @@
   }
   #toast.show{opacity:1;}
 
-  /* CSS สำหรับพิมพ์เอกสาร */
   @media print {
     body { background: #fff; color: #000; padding: 0; }
-    header, .controls, .stats, .add-row, .bottom-bar, .section-head, .auth-btn, .row-actions, #toast { display: none !important; }
+    header, .controls, .stats, .add-row, .bottom-bar, .section-head, .row-actions, #toast { display: none !important; }
     .table-wrap, .log-table { border: none; margin: 0; padding: 0; }
     table { width: 100%; font-size: 10pt; border-collapse: collapse; min-width: 100% !important; }
     th, td { border: 1px solid #000 !important; padding: 5px !important; }
@@ -150,8 +147,8 @@
   <div class="header-top">
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwFwD5zPj66_vWJXhRXLg7aswaZy4VFv3nT9LdDPz8w7bp5OLVI5fC7kaA&s=10" alt="โลโก้กู้ภัย">
     <div>
-      <h1>มูลนิธิปอเต็กตึ๊ง </h1>
-      <p>ระบบจัดการสต็อกวัสดุ-อุปกรณ์ / โรงครัวเคลื่อนที่ ใต้ 4-00 </p>
+      <h1>ระบบจัดการสต็อกวัสดุ-อุปกรณ์</h1>
+      <p>คลังอุปกรณ์ประกอบอาหาร / ทีมงานกู้ภัย</p>
     </div>
   </div>
   <div class="top-actions">
@@ -192,34 +189,28 @@
   <button onclick="openAddModal()">+ เพิ่มรายการใหม่</button>
 </div>
 
-<!-- ส่วน Log ที่จำกัดสิทธิ์การเข้าดู -->
 <div class="section">
   <div class="section-head">
-    <h2>📜 ประวัติการรับเข้า-เบิกออก (Inventory Log)</h2>
-    <button class="auth-btn" id="btnToggleLog" onclick="toggleLogAuth()">🔒 เข้าสู่ระบบดู Log</button>
+    <h2>📜 ประวัติการรับเข้า-เบิกออก & เข้าชมระบบ (Log)</h2>
+    <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
   </div>
   
-  <div id="logContainer" style="display:none;">
-    <div style="text-align: right; margin-bottom: 8px;">
-      <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
-    </div>
-    <div class="log-table">
-      <table>
-        <thead>
-          <tr>
-            <th>วันที่-เวลา</th>
-            <th>ชื่อรายการ</th>
-            <th>ประเภท</th>
-            <th>จำนวน</th>
-            <th>คงเหลือ</th>
-            <th>ผู้ดำเนินการ</th>
-            <th>หมายเหตุ</th>
-          </tr>
-        </thead>
-        <tbody id="logBody"></tbody>
-      </table>
-      <div id="logEmpty" class="empty-log" style="display:none;">ยังไม่มีประวัติการทำรายการ</div>
-    </div>
+  <div class="log-table">
+    <table>
+      <thead>
+        <tr>
+          <th>วันที่-เวลา</th>
+          <th>ชื่อรายการ / กิจกรรม</th>
+          <th>ประเภท</th>
+          <th>จำนวน</th>
+          <th>คงเหลือ</th>
+          <th>ผู้ดำเนินการ / IP Address</th>
+          <th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody id="logBody"></tbody>
+    </table>
+    <div id="logEmpty" class="empty-log" style="display:none;">ยังไม่มีประวัติการทำรายการ</div>
   </div>
 </div>
 
@@ -234,7 +225,6 @@
 const STORAGE_KEY = 'stock-items-v4';
 const LOG_KEY = 'stock-log-v4';
 const LOW_THRESHOLD = 3;
-const ADMIN_PASS = '1234'; // รหัสผ่านสำหรับเปิดดู Log (สามารถเปลี่ยนได้)
 
 const seedData = [
 ["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21],
@@ -286,7 +276,7 @@ let items = [];
 let log = [];
 let searchTerm = '';
 let modalTarget = null;
-let isAuthorized = false;
+let currentUserIp = 'กำลังดึง IP...';
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -299,6 +289,31 @@ function nowStr(){
   const d = new Date();
   const pad = n => String(n).padStart(2,'0');
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()+543).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// ฟังก์ชันดึง IP Address และบันทึกประวัติการเข้าชมแอป
+async function fetchUserIpAndLogVisit() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    currentUserIp = data.ip;
+  } catch (err) {
+    currentUserIp = 'ไม่ทราบ IP';
+  }
+  
+  // บันทึกลง Log เมื่อเข้าชมหน้าเว็บ
+  const currentTime = nowStr();
+  log.push({ 
+    datetime: currentTime, 
+    name: 'เข้าใช้งานหน้าแอปพลิเคชัน', 
+    type: 'visit', 
+    amount: '-', 
+    operator: currentUserIp, 
+    note: 'ผู้ใช้งานเปิดเข้าหน้าเว็บ', 
+    remainingAfter: '-' 
+  });
+  await saveLog();
+  render();
 }
 
 async function loadAll(){
@@ -374,25 +389,30 @@ function render(){
     </tr>`;
   }).join('');
 
-  if(isAuthorized){
-    const logBody = document.getElementById('logBody');
-    const logEmpty = document.getElementById('logEmpty');
-    if(log.length===0){
-      logBody.innerHTML = '';
-      logEmpty.style.display = 'block';
-    }else{
-      logEmpty.style.display = 'none';
-      logBody.innerHTML = log.slice().reverse().slice(0,50).map(l=>`
-        <tr>
-          <td>${l.datetime}</td>
-          <td style="text-align:left;padding-left:10px;">${escapeHtml(l.name)}</td>
-          <td>${l.type==='in'?'รับเข้า':'เบิกออก'}</td>
-          <td>${l.amount}</td>
-          <td>${l.remainingAfter}</td>
-          <td>${escapeHtml(l.operator || '-')}</td>
-          <td>${escapeHtml(l.note || '-')}</td>
-        </tr>`).join('');
-    }
+  const logBody = document.getElementById('logBody');
+  const logEmpty = document.getElementById('logEmpty');
+  if(log.length===0){
+    logBody.innerHTML = '';
+    logEmpty.style.display = 'block';
+  }else{
+    logEmpty.style.display = 'none';
+    logBody.innerHTML = log.slice().reverse().slice(0,50).map(l=>{
+      let typeLabel = 'รับเข้า';
+      if(l.type === 'out') typeLabel = 'เบิกออก';
+      else if(l.type === 'add') typeLabel = 'เพิ่มรายการ';
+      else if(l.type === 'visit') typeLabel = '🌐 เข้าชมแอป';
+
+      return `
+      <tr>
+        <td>${l.datetime}</td>
+        <td style="text-align:left;padding-left:10px;">${escapeHtml(l.name)}</td>
+        <td>${typeLabel}</td>
+        <td>${l.amount}</td>
+        <td>${l.remainingAfter}</td>
+        <td>${escapeHtml(l.operator || '-')}</td>
+        <td>${escapeHtml(l.note || '-')}</td>
+      </tr>`;
+    }).join('');
   }
 }
 
@@ -409,7 +429,7 @@ function openModal(itemId, type){
       <label>จำนวน</label>
       <input type="number" id="mAmount" min="1" value="1">
       <label>ชื่อ-รหัสกู้ภัย ผู้ดำเนินการ</label>
-      <input type="text" id="mOperator" placeholder="เช่น นายกู้ภัย ใจดี (รหัส 401)">
+      <input type="text" id="mOperator" placeholder="เช่น กู้ภัย 434">
       <label>หมายเหตุ (ถ้ามี)</label>
       <input type="text" id="mNote" placeholder="ระบุเพิ่มเติม...">
       <div class="modal-actions">
@@ -443,7 +463,8 @@ async function confirmModal(){
   it.lastNote = note || '-';
 
   const rem = remaining(it);
-  log.push({ datetime: currentTime, name: it.name, type, amount, operator, note, remainingAfter: rem });
+  // พ่วง IP Address ของผู้ทำรายการใส่เข้าไปในหมายเหตุ/Log ด้วย
+  log.push({ datetime: currentTime, name: it.name, type, amount, operator: `${operator} (${currentUserIp})`, note, remainingAfter: rem });
   
   await saveItems(); await saveLog();
   closeModal(); render();
@@ -461,7 +482,7 @@ function openAddModal(){
       <label>จำนวนเริ่มต้น</label>
       <input type="number" id="nQty" min="0" value="0">
       <label>ชื่อ-รหัสกู้ภัย ผู้ดำเนินการ</label>
-      <input type="text" id="nOperator" placeholder="เช่น นายกู้ภัย ใจดี (รหัส 401)">
+      <input type="text" id="nOperator" placeholder="เช่น กู้ภัย 434">
       <label>หมายเหตุ</label>
       <input type="text" id="nNote" placeholder="ระบุเพิ่มเติม...">
       <div class="modal-actions">
@@ -471,16 +492,19 @@ function openAddModal(){
     </div>`;
   document.body.appendChild(bg);
 }
+
 async function confirmAdd(){
   const name = document.getElementById('nName').value.trim();
   const qty = parseInt(document.getElementById('nQty').value,10) || 0;
   const operator = document.getElementById('nOperator').value.trim();
-  const note = document.getElementById('nNote').value.trim();
+  const note = document.getElementById('nNote')?.value.trim() || '';
 
   if(!name){ toast('กรุณาใส่ชื่อรายการ'); return; }
 
   const maxNo = items.reduce((m,it)=>Math.max(m, parseInt(it.no)||0), 0);
-  items.push({ 
+  const currentTime = nowStr();
+  
+  const newItem = { 
     id:'item-'+Date.now(), 
     no:String(maxNo+1), 
     name, 
@@ -488,37 +512,30 @@ async function confirmAdd(){
     totalIn:0, 
     totalOut:0,
     lastOperator: operator || '-',
-    lastUpdated: nowStr(),
+    lastUpdated: currentTime,
     lastNote: note || '-'
+  };
+
+  items.push(newItem);
+
+  log.push({ 
+    datetime: currentTime, 
+    name: newItem.name, 
+    type: 'add', 
+    amount: qty, 
+    operator: `${operator || '-'} (${currentUserIp})`, 
+    note: (note ? note : 'สร้างรายการใหม่'), 
+    remainingAfter: qty 
   });
 
-  await saveItems(); closeModal(); render();
-  toast('เพิ่มรายการแล้ว');
-}
-
-/* ระบบปลดล็อกดู Log */
-function toggleLogAuth(){
-  if(isAuthorized){
-    isAuthorized = false;
-    document.getElementById('logContainer').style.display = 'none';
-    document.getElementById('btnToggleLog').textContent = '🔒 เข้าสู่ระบบดู Log';
-    toast('ออกจากระบบดู Log');
-  }else{
-    const pwd = prompt('กรุณาใส่รหัสผ่านสำหรับผู้มีสิทธิ์:');
-    if(pwd === ADMIN_PASS){
-      isAuthorized = true;
-      document.getElementById('logContainer').style.display = 'block';
-      document.getElementById('btnToggleLog').textContent = '🔓 ล็อกการเข้าถึง Log';
-      render();
-      toast('เข้าสู่ระบบสำเร็จ');
-    }else if(pwd !== null){
-      toast('รหัสผ่านไม่ถูกต้อง');
-    }
-  }
+  await saveItems(); 
+  await saveLog(); 
+  closeModal(); 
+  render();
+  toast('เพิ่มรายการสำเร็จ');
 }
 
 async function clearLog(){
-  if(!isAuthorized) return;
   if(!confirm('ล้างประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
   log = [];
   await saveLog(); render();
@@ -540,15 +557,15 @@ function exportCsv(){
 }
 
 function downloadLog(){
-  if(!isAuthorized){
-    const pwd = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด Log:');
-    if(pwd !== ADMIN_PASS){
-      if(pwd !== null) toast('รหัสผ่านไม่ถูกต้อง');
-      return;
-    }
-  }
-  let csv = '\uFEFFวันที่-เวลา,ชื่อรายการ,ประเภท,จำนวน,ผู้ดำเนินการ,หมายเหตุ,คงเหลือ\n';
-  log.forEach(l=>{ csv += `${l.datetime},"${l.name}",${l.type==='in'?'รับเข้า':'เบิกออก'},${l.amount},"${l.operator||''}","${l.note||''}",${l.remainingAfter}\n`; });
+  let csv = '\uFEFFวันที่-เวลา,ชื่อรายการ,ประเภท,จำนวน,ผู้ดำเนินการ/IP,หมายเหตุ,คงเหลือ\n';
+  log.forEach(l=>{ 
+    let typeLabel = 'รับเข้า';
+    if(l.type === 'out') typeLabel = 'เบิกออก';
+    else if(l.type === 'add') typeLabel = 'เพิ่มรายการ';
+    else if(l.type === 'visit') typeLabel = 'เข้าชมแอป';
+
+    csv += `${l.datetime},"${l.name}",${typeLabel},${l.amount},"${l.operator||''}","${l.note||''}",${l.remainingAfter}\n`; 
+  });
   downloadBlob(csv, 'stock-log.csv');
   toast('ดาวน์โหลด Log แล้ว');
 }
@@ -564,7 +581,11 @@ function downloadBlob(text, filename){
 
 document.getElementById('search').addEventListener('input', e=>{ searchTerm=e.target.value; render(); });
 
-(async ()=>{ await loadAll(); render(); })();
+(async ()=>{ 
+  await loadAll(); 
+  render(); 
+  await fetchUserIpAndLogVisit(); // เรียกฟังก์ชันดึง IP และลงบันทึกการเข้าชมทันทีที่โหลดแอป
+})();
 </script>
 </body>
 </html>
