@@ -84,14 +84,25 @@
   .note-text{font-style:italic;color:#666;}
 
   .section{margin:18px 16px 0;}
-  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;}
   .section-head h2{margin:0;font-size:.92rem;}
+  .btn-action-group{display:flex;gap:6px;}
+  .unlock-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
   .clear-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
   
   .log-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
   .log-table table{font-size:.74rem;min-width:100%;}
   .log-table thead th{font-size:.65rem;}
   .empty-log{padding:26px 12px;text-align:center;color:var(--muted);font-size:.8rem;}
+
+  .log-locked-box{
+    padding:35px 16px;text-align:center;background:var(--panel);
+    border:1px dashed var(--line);border-radius:12px;color:var(--muted);
+  }
+  .log-locked-box button{
+    margin-top:10px;padding:9px 18px;background:var(--navy);color:#fff;
+    border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.85rem;
+  }
 
   .add-row{padding:14px 16px 0;}
   .add-row button{width:100%;padding:11px;border-radius:99px;border:1px dashed var(--line);background:var(--panel);color:var(--red);font-weight:700;font-size:.84rem;cursor:pointer;}
@@ -116,6 +127,7 @@
   .btn-cancel{background:var(--paper);color:var(--ink);border:1px solid var(--line) !important;}
   .btn-confirm-in{background:var(--green);color:#fff;}
   .btn-confirm-out{background:var(--amber);color:#fff;}
+  .btn-confirm-navy{background:var(--navy);color:#fff;}
 
   #toast{
     position:fixed;bottom:72px;left:50%;transform:translateX(-50%);
@@ -126,7 +138,7 @@
 
   @media print {
     body { background: #fff; color: #000; padding: 0; }
-    header, .controls, .stats, .add-row, .bottom-bar, .section-head, .row-actions, #toast { display: none !important; }
+    header, .controls, .stats, .add-row, .bottom-bar, .section-head, .row-actions, #toast, .log-locked-box { display: none !important; }
     .table-wrap, .log-table { border: none; margin: 0; padding: 0; }
     table { width: 100%; font-size: 10pt; border-collapse: collapse; min-width: 100% !important; }
     th, td { border: 1px solid #000 !important; padding: 5px !important; }
@@ -192,10 +204,20 @@
 <div class="section">
   <div class="section-head">
     <h2>📜 ประวัติการรับเข้า-เบิกออก & เข้าชมระบบ (Log)</h2>
-    <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
+    <div class="btn-action-group">
+      <button id="lockToggleBtn" class="unlock-btn" onclick="toggleLogLock()">🔒 ปลดล็อกเพื่อดู Log</button>
+      <button id="clearLogBtn" class="clear-btn" onclick="clearLogWithPass()" style="display:none;">ล้างประวัติ</button>
+    </div>
+  </div>
+
+  <!-- ข้อความแจ้งเตือนเมื่อยังไม่ได้ปลดล็อก -->
+  <div id="logLockedBox" class="log-locked-box">
+    🔒 <b>ข้อมูล Log ถูกจำกัดสิทธิ์การเข้าถึง</b>
+    <p style="margin: 4px 0 0; font-size: 0.78rem;">ต้องใช้รหัสผ่านสำหรับผู้ดูแลเพื่อเปิดดูประวัติการใช้งาน</p>
+    <button onclick="promptLogPassword()">กรอกรหัสผ่านเพื่อเข้าดู</button>
   </div>
   
-  <div class="log-table">
+  <div id="logTableWrap" class="log-table" style="display:none;">
     <table>
       <thead>
         <tr>
@@ -216,7 +238,7 @@
 
 <div class="bottom-bar">
   <button onclick="printDocument()">🖨️ พิมพ์เอกสารสต็อก</button>
-  <button onclick="downloadLog()">⬇ ดาวน์โหลด Log (CSV)</button>
+  <button onclick="downloadLogWithPass()">⬇ ดาวน์โหลด Log (CSV)</button>
 </div>
 
 <div id="toast"></div>
@@ -225,6 +247,9 @@
 const STORAGE_KEY = 'stock-items-v4';
 const LOG_KEY = 'stock-log-v4';
 const LOW_THRESHOLD = 3;
+
+// รหัสผ่านสำหรับเปิดดู Log (สามารถเปลี่ยนตรงนี้ได้ตามต้องการ)
+const LOG_PASSWORD = '1234'; 
 
 const seedData = [
 ["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21],
@@ -277,6 +302,7 @@ let log = [];
 let searchTerm = '';
 let modalTarget = null;
 let currentUserIp = 'กำลังดึง IP...';
+let isLogUnlocked = false; // สถานะการปลดล็อก Log
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -291,7 +317,6 @@ function nowStr(){
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()+543).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-// ฟังก์ชันดึง IP Address และบันทึกประวัติการเข้าชมแอป
 async function fetchUserIpAndLogVisit() {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
@@ -301,7 +326,6 @@ async function fetchUserIpAndLogVisit() {
     currentUserIp = 'ไม่ทราบ IP';
   }
   
-  // บันทึกลง Log เมื่อเข้าชมหน้าเว็บ
   const currentTime = nowStr();
   log.push({ 
     datetime: currentTime, 
@@ -359,6 +383,70 @@ async function saveLog(){ try{ await STORE.set(LOG_KEY, JSON.stringify(log)); }c
 function remaining(it){ return it.initialQty + it.totalIn - it.totalOut; }
 function statusOf(qty){ if(qty<=0) return 'low'; if(qty<=LOW_THRESHOLD) return 'mid'; return 'ok'; }
 function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* --- ระบบยืนยันรหัสผ่าน --- */
+function promptLogPassword(callbackOnSuccess){
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg'; bg.id = 'passModalBg';
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>🔑 ยืนยันรหัสผ่านผู้ดูแล</h3>
+      <label>กรอกรหัสผ่านเพื่อเข้าถึง Log</label>
+      <input type="password" id="logPassInput" placeholder="กรอกรหัสผ่าน..." autofocus>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePassModal()">ยกเลิก</button>
+        <button class="btn-confirm-navy" onclick="verifyPassword()">ยืนยัน</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+
+  window.verifyPassword = function(){
+    const inputPass = document.getElementById('logPassInput').value;
+    if(inputPass === LOG_PASSWORD){
+      closePassModal();
+      isLogUnlocked = true;
+      updateLogVisibility();
+      toast('ปลดล็อกสิทธิ์ดู Log สำเร็จ');
+      if(typeof callbackOnSuccess === 'function') callbackOnSuccess();
+    }else{
+      toast('❌ รหัสผ่านไม่ถูกต้อง');
+    }
+  };
+}
+
+function closePassModal(){
+  const bg = document.getElementById('passModalBg');
+  if(bg) bg.remove();
+}
+
+function toggleLogLock(){
+  if(isLogUnlocked){
+    isLogUnlocked = false;
+    updateLogVisibility();
+    toast('ล๊อคการแสดงผล Log แล้ว');
+  }else{
+    promptLogPassword();
+  }
+}
+
+function updateLogVisibility(){
+  const lockedBox = document.getElementById('logLockedBox');
+  const tableWrap = document.getElementById('logTableWrap');
+  const lockBtn = document.getElementById('lockToggleBtn');
+  const clearBtn = document.getElementById('clearLogBtn');
+
+  if(isLogUnlocked){
+    lockedBox.style.display = 'none';
+    tableWrap.style.display = 'block';
+    lockBtn.textContent = '🔓 ล็อค Log อีกครั้ง';
+    clearBtn.style.display = 'inline-block';
+  }else{
+    lockedBox.style.display = 'block';
+    tableWrap.style.display = 'none';
+    lockBtn.textContent = '🔒 ปลดล็อกเพื่อดู Log';
+    clearBtn.style.display = 'none';
+  }
+}
 
 function render(){
   const body = document.getElementById('itemsBody');
@@ -463,7 +551,6 @@ async function confirmModal(){
   it.lastNote = note || '-';
 
   const rem = remaining(it);
-  // พ่วง IP Address ของผู้ทำรายการใส่เข้าไปในหมายเหตุ/Log ด้วย
   log.push({ datetime: currentTime, name: it.name, type, amount, operator: `${operator} (${currentUserIp})`, note, remainingAfter: rem });
   
   await saveItems(); await saveLog();
@@ -535,10 +622,10 @@ async function confirmAdd(){
   toast('เพิ่มรายการสำเร็จ');
 }
 
-async function clearLog(){
+function clearLogWithPass(){
   if(!confirm('ล้างประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
   log = [];
-  await saveLog(); render();
+  saveLog(); render();
   toast('ล้างประวัติแล้ว');
 }
 
@@ -556,7 +643,15 @@ function exportCsv(){
   toast('ดาวน์โหลด Export แล้ว');
 }
 
-function downloadLog(){
+function downloadLogWithPass(){
+  if(!isLogUnlocked){
+    promptLogPassword(() => executeDownloadLog());
+  } else {
+    executeDownloadLog();
+  }
+}
+
+function executeDownloadLog(){
   let csv = '\uFEFFวันที่-เวลา,ชื่อรายการ,ประเภท,จำนวน,ผู้ดำเนินการ/IP,หมายเหตุ,คงเหลือ\n';
   log.forEach(l=>{ 
     let typeLabel = 'รับเข้า';
@@ -584,7 +679,7 @@ document.getElementById('search').addEventListener('input', e=>{ searchTerm=e.ta
 (async ()=>{ 
   await loadAll(); 
   render(); 
-  await fetchUserIpAndLogVisit(); // เรียกฟังก์ชันดึง IP และลงบันทึกการเข้าชมทันทีที่โหลดแอป
+  await fetchUserIpAndLogVisit();
 })();
 </script>
 </body>
