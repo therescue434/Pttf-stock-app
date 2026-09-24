@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบคลังวัสดุ-อุปกรณ์ | สโตร์โรงครัวเคลื่อนที่</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#0f172a;--mu:#64748b;--bd:#e2e8f0;--ac:#4f46e5;--acs:#eef2ff;--ok:#16a34a;--oks:#dcfce7;--wr:#d97706;--wrs:#fef3c7;--er:#dc2626;--ers:#fee2e2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--card:#151b2e;--tx:#e8ecf5;--mu:#94a3b8;--bd:#263049;--ac:#818cf8;--acs:#1e2547;--oks:#12351f;--wrs:#3a2b0d;--ers:#3d1616}}
+:root[data-theme="dark"]{--bg:#0b1020;--card:#151b2e;--tx:#e8ecf5;--mu:#94a3b8;--bd:#263049;--ac:#818cf8;--acs:#1e2547;--oks:#12351f;--wrs:#3a2b0d;--ers:#3d1616}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Prompt',system-ui,sans-serif;font-size:15px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-size:20px;margin:0;font-weight:600}
+.sub{color:var(--mu);font-size:13px;margin-top:2px}
+.live{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:6px 14px;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:p 1.6s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(22,163,74,.6)}100%{box-shadow:0 0 0 10px rgba(22,163,74,0)}}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+@media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px}
+.kpi b{display:block;font-size:26px;font-weight:600;margin-top:4px;transition:transform .3s}
+.kpi span{color:var(--mu);font-size:12.5px}
+.bump{transform:scale(1.15)}
+.tools{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+input,select{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;width:100%;outline:none}
+input:focus{border-color:var(--ac)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.chip{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
