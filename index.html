@@ -23,7 +23,6 @@
   *{box-sizing:border-box;}
   body{margin:0;background:var(--paper);color:var(--ink);padding-bottom:78px;}
   
-  /* ปรับแต่งส่วน Header ด้านบนให้สวยงาม */
   header{
     background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
     color:#fff;
@@ -45,8 +44,6 @@
     font-weight:700;font-size:.86rem;display:flex;align-items:center;justify-content:center;gap:5px;
     cursor:pointer;
   }
-  .btn-in{background:var(--green);color:#fff;}
-  .btn-out{background:var(--amber);color:#fff;}
   .btn-export{background:var(--navy);color:#fff;}
 
   .controls{padding:14px 16px 4px;display:flex;gap:8px;}
@@ -60,9 +57,8 @@
   .stat b{display:block;font-size:1.02rem;}
   .stat span{font-size:.68rem;color:var(--muted);}
 
-  /* ปรับแต่งตารางรองรับคอลัมน์ใหม่ */
   .table-wrap{margin:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:650px;}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:850px;}
   thead th{
     background:#f0ece0;color:#5c5748;font-weight:700;
     padding:10px 6px;text-align:center;font-size:.72rem;
@@ -78,7 +74,11 @@
   .badge.mid{background:var(--amber-bg);color:var(--amber);}
   .badge.low{background:#f8e6e2;color:var(--red);}
   .row-name-sub{display:block;font-size:.66rem;font-weight:400;color:var(--muted);}
-  .del-x{color:var(--muted);font-size:.7rem;padding:2px 4px;cursor:pointer;background:none;border:none;}
+
+  /* ปุ่มกดประจำแถว */
+  .row-actions{display:flex;gap:4px;justify-content:center;}
+  .btn-tbl-in{background:var(--green);color:#fff;border:none;border-radius:6px;padding:5px 8px;font-size:.7rem;font-weight:700;cursor:pointer;}
+  .btn-tbl-out{background:var(--amber);color:#fff;border:none;border-radius:6px;padding:5px 8px;font-size:.7rem;font-weight:700;cursor:pointer;}
 
   .operator-text{font-weight:600;color:#2c3e50;}
   .time-text{color:var(--muted);font-size:.7rem;}
@@ -87,9 +87,11 @@
   .section{margin:18px 16px 0;}
   .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
   .section-head h2{margin:0;font-size:.92rem;}
+  .auth-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
   .clear-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
+  
   .log-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
-  .log-table table{font-size:.74rem;}
+  .log-table table{font-size:.74rem;min-width:100%;}
   .log-table thead th{font-size:.65rem;}
   .empty-log{padding:26px 12px;text-align:center;color:var(--muted);font-size:.8rem;}
 
@@ -123,13 +125,29 @@
     opacity:0;transition:opacity .25s;pointer-events:none;z-index:30;
   }
   #toast.show{opacity:1;}
+
+  /* CSS สำหรับพิมพ์เอกสาร */
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    header, .controls, .stats, .add-row, .bottom-bar, .section-head, .auth-btn, .row-actions, #toast { display: none !important; }
+    .table-wrap, .log-table { border: none; margin: 0; padding: 0; }
+    table { width: 100%; font-size: 10pt; border-collapse: collapse; min-width: 100% !important; }
+    th, td { border: 1px solid #000 !important; padding: 5px !important; }
+    .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
+  }
+  .print-header { display: none; }
 </style>
 </head>
 <body>
 
+<div class="print-header">
+  <h2 style="margin:0;">รายงานสรุปสต็อกวัสดุ-อุปกรณ์</h2>
+  <p style="margin:5px 0 0;">คลังอุปกรณ์ประกอบอาหาร / ทีมงานกู้ภัย</p>
+  <p style="margin:3px 0 0; font-size: 0.85rem;" id="printDate"></p>
+</div>
+
 <header>
   <div class="header-top">
-    <!-- ใส่รูปภาพโลโก้ตรงนี้ -->
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwFwD5zPj66_vWJXhRXLg7aswaZy4VFv3nT9LdDPz8w7bp5OLVI5fC7kaA&s=10" alt="โลโก้กู้ภัย">
     <div>
       <h1>ระบบจัดการสต็อกวัสดุ-อุปกรณ์</h1>
@@ -137,9 +155,7 @@
     </div>
   </div>
   <div class="top-actions">
-    <button class="btn-in" onclick="openModal(null,'in')">＋ รับเข้า</button>
-    <button class="btn-out" onclick="openModal(null,'out')">－ เบิกออก</button>
-    <button class="btn-export" onclick="exportCsv()">⬇ Export</button>
+    <button class="btn-export" onclick="exportCsv()">⬇ Export รายงาน (CSV)</button>
   </div>
 </header>
 
@@ -162,10 +178,10 @@
         <th>รับเข้า</th>
         <th>เบิกออก</th>
         <th>คงเหลือ</th>
+        <th>จัดการ</th>
         <th>ผู้ดำเนินการ (ชื่อ-รหัสกู้ภัย)</th>
         <th>วันที่ / เวลา</th>
         <th>หมายเหตุ</th>
-        <th></th>
       </tr>
     </thead>
     <tbody id="itemsBody"></tbody>
@@ -176,41 +192,49 @@
   <button onclick="openAddModal()">+ เพิ่มรายการใหม่</button>
 </div>
 
+<!-- ส่วน Log ที่จำกัดสิทธิ์การเข้าดู -->
 <div class="section">
   <div class="section-head">
     <h2>📜 ประวัติการรับเข้า-เบิกออก (Inventory Log)</h2>
-    <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
+    <button class="auth-btn" id="btnToggleLog" onclick="toggleLogAuth()">🔒 เข้าสู่ระบบดู Log</button>
   </div>
-  <div class="log-table">
-    <table>
-      <thead>
-        <tr>
-          <th>วันที่-เวลา</th>
-          <th>ชื่อรายการ</th>
-          <th>ประเภท</th>
-          <th>จำนวน</th>
-          <th>คงเหลือ</th>
-          <th>ผู้ดำเนินการ</th>
-          <th>หมายเหตุ</th>
-        </tr>
-      </thead>
-      <tbody id="logBody"></tbody>
-    </table>
-    <div id="logEmpty" class="empty-log" style="display:none;">ยังไม่มีประวัติการทำรายการ</div>
+  
+  <div id="logContainer" style="display:none;">
+    <div style="text-align: right; margin-bottom: 8px;">
+      <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
+    </div>
+    <div class="log-table">
+      <table>
+        <thead>
+          <tr>
+            <th>วันที่-เวลา</th>
+            <th>ชื่อรายการ</th>
+            <th>ประเภท</th>
+            <th>จำนวน</th>
+            <th>คงเหลือ</th>
+            <th>ผู้ดำเนินการ</th>
+            <th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="logBody"></tbody>
+      </table>
+      <div id="logEmpty" class="empty-log" style="display:none;">ยังไม่มีประวัติการทำรายการ</div>
+    </div>
   </div>
 </div>
 
 <div class="bottom-bar">
-  <button onclick="saveGps()">📍 บันทึก GPS</button>
-  <button onclick="downloadLog()">⬇ ดาวน์โหลด Log</button>
+  <button onclick="printDocument()">🖨️ พิมพ์เอกสารสต็อก</button>
+  <button onclick="downloadLog()">⬇ ดาวน์โหลด Log (CSV)</button>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'stock-items-v3';
-const LOG_KEY = 'stock-log-v3';
+const STORAGE_KEY = 'stock-items-v4';
+const LOG_KEY = 'stock-log-v4';
 const LOW_THRESHOLD = 3;
+const ADMIN_PASS = '1234'; // รหัสผ่านสำหรับเปิดดู Log (สามารถเปลี่ยนได้)
 
 const seedData = [
 ["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21],
@@ -262,6 +286,7 @@ let items = [];
 let log = [];
 let searchTerm = '';
 let modalTarget = null;
+let isAuthorized = false;
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -337,30 +362,37 @@ function render(){
       <td class="num-in">${it.totalIn}</td>
       <td class="num-out">${it.totalOut}</td>
       <td><span class="badge ${st}">${rem}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="btn-tbl-in" onclick="openModal('${it.id}','in')">＋รับ</button>
+          <button class="btn-tbl-out" onclick="openModal('${it.id}','out')">－เบิก</button>
+        </div>
+      </td>
       <td class="operator-text">${escapeHtml(it.lastOperator || '-')}</td>
       <td class="time-text">${escapeHtml(it.lastUpdated || '-')}</td>
       <td class="note-text">${escapeHtml(it.lastNote || '-')}</td>
-      <td><button class="del-x" onclick="removeItem('${it.id}')">✕</button></td>
     </tr>`;
   }).join('');
 
-  const logBody = document.getElementById('logBody');
-  const logEmpty = document.getElementById('logEmpty');
-  if(log.length===0){
-    logBody.innerHTML = '';
-    logEmpty.style.display = 'block';
-  }else{
-    logEmpty.style.display = 'none';
-    logBody.innerHTML = log.slice().reverse().slice(0,50).map(l=>`
-      <tr>
-        <td>${l.datetime}</td>
-        <td style="text-align:left;padding-left:10px;">${escapeHtml(l.name)}</td>
-        <td>${l.type==='in'?'รับเข้า':'เบิกออก'}</td>
-        <td>${l.amount}</td>
-        <td>${l.remainingAfter}</td>
-        <td>${escapeHtml(l.operator || '-')}</td>
-        <td>${escapeHtml(l.note || '-')}</td>
-      </tr>`).join('');
+  if(isAuthorized){
+    const logBody = document.getElementById('logBody');
+    const logEmpty = document.getElementById('logEmpty');
+    if(log.length===0){
+      logBody.innerHTML = '';
+      logEmpty.style.display = 'block';
+    }else{
+      logEmpty.style.display = 'none';
+      logBody.innerHTML = log.slice().reverse().slice(0,50).map(l=>`
+        <tr>
+          <td>${l.datetime}</td>
+          <td style="text-align:left;padding-left:10px;">${escapeHtml(l.name)}</td>
+          <td>${l.type==='in'?'รับเข้า':'เบิกออก'}</td>
+          <td>${l.amount}</td>
+          <td>${l.remainingAfter}</td>
+          <td>${escapeHtml(l.operator || '-')}</td>
+          <td>${escapeHtml(l.note || '-')}</td>
+        </tr>`).join('');
+    }
   }
 }
 
@@ -464,18 +496,38 @@ async function confirmAdd(){
   toast('เพิ่มรายการแล้ว');
 }
 
-async function removeItem(id){
-  if(!confirm('ลบรายการนี้ออกจากคลัง?')) return;
-  items = items.filter(x=>x.id!==id);
-  await saveItems(); render();
-  toast('ลบรายการแล้ว');
+/* ระบบปลดล็อกดู Log */
+function toggleLogAuth(){
+  if(isAuthorized){
+    isAuthorized = false;
+    document.getElementById('logContainer').style.display = 'none';
+    document.getElementById('btnToggleLog').textContent = '🔒 เข้าสู่ระบบดู Log';
+    toast('ออกจากระบบดู Log');
+  }else{
+    const pwd = prompt('กรุณาใส่รหัสผ่านสำหรับผู้มีสิทธิ์:');
+    if(pwd === ADMIN_PASS){
+      isAuthorized = true;
+      document.getElementById('logContainer').style.display = 'block';
+      document.getElementById('btnToggleLog').textContent = '🔓 ล็อกการเข้าถึง Log';
+      render();
+      toast('เข้าสู่ระบบสำเร็จ');
+    }else if(pwd !== null){
+      toast('รหัสผ่านไม่ถูกต้อง');
+    }
+  }
 }
 
 async function clearLog(){
+  if(!isAuthorized) return;
   if(!confirm('ล้างประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
   log = [];
   await saveLog(); render();
   toast('ล้างประวัติแล้ว');
+}
+
+function printDocument(){
+  document.getElementById('printDate').textContent = 'วันที่พิมพ์เอกสาร: ' + nowStr();
+  window.print();
 }
 
 function exportCsv(){
@@ -486,12 +538,21 @@ function exportCsv(){
   downloadBlob(csv, 'stock-export.csv');
   toast('ดาวน์โหลด Export แล้ว');
 }
+
 function downloadLog(){
+  if(!isAuthorized){
+    const pwd = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด Log:');
+    if(pwd !== ADMIN_PASS){
+      if(pwd !== null) toast('รหัสผ่านไม่ถูกต้อง');
+      return;
+    }
+  }
   let csv = '\uFEFFวันที่-เวลา,ชื่อรายการ,ประเภท,จำนวน,ผู้ดำเนินการ,หมายเหตุ,คงเหลือ\n';
   log.forEach(l=>{ csv += `${l.datetime},"${l.name}",${l.type==='in'?'รับเข้า':'เบิกออก'},${l.amount},"${l.operator||''}","${l.note||''}",${l.remainingAfter}\n`; });
   downloadBlob(csv, 'stock-log.csv');
   toast('ดาวน์โหลด Log แล้ว');
 }
+
 function downloadBlob(text, filename){
   const blob = new Blob([text], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -499,16 +560,6 @@ function downloadBlob(text, filename){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
-}
-
-function saveGps(){
-  if(!navigator.geolocation){ toast('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
-  toast('กำลังค้นหาตำแหน่ง...');
-  navigator.geolocation.getCurrentPosition(
-    pos => toast(`บันทึกตำแหน่งแล้ว: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`),
-    () => toast('ไม่สามารถเข้าถึงตำแหน่งได้'),
-    { timeout: 8000 }
-  );
 }
 
 document.getElementById('search').addEventListener('input', e=>{ searchTerm=e.target.value; render(); });
