@@ -1,654 +1,520 @@
 <!DOCTYPE html>
-<html>
-   <body>
-       <h1>This is Web Page </h1>
-       <p>This is Paragraph </p>
-       <script>
-           document.write("Welcome!");
-       </script>
-   </body>
-</html>
-```html
-<!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดเก็บข้อมูลภายในคลังสินค้า - สโตร์โรงครัวเคลื่อนที่</title>
-    <!-- Tailwind CSS -->
-    <script src="
-
-"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="
-
-">
-    <!-- Google Fonts Inter & Prompt -->
-    <link href="
-
-" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .bg-gradient-banner { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดการสต็อก</title>
+<style>
+  :root{
+    --ink:#232323;
+    --paper:#f6f4ee;
+    --panel:#ffffff;
+    --line:#e1ddd0;
+    --slate:#3d4f5c;
+    --slate-dark:#2a3740;
+    --amber:#c8791a;
+    --amber-bg:#fbeedd;
+    --red:#b23b2e;
+    --red-bg:#f8e6e2;
+    --green:#4c7a4f;
+    --green-bg:#e9f1e8;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    padding-bottom:40px;
+  }
+  header{
+    background:var(--slate-dark);
+    color:#f2efe6;
+    padding:22px 18px 20px;
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.35rem;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  header p{
+    margin:0;
+    font-size:.82rem;
+    color:#c7cdd1;
+  }
+  .stats{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+    overflow-x:auto;
+  }
+  .stat{
+    background:rgba(255,255,255,.08);
+    border-radius:8px;
+    padding:8px 12px;
+    min-width:84px;
+    flex:0 0 auto;
+  }
+  .stat b{display:block;font-size:1.05rem;}
+  .stat span{font-size:.7rem;color:#c7cdd1;}
+  .controls{
+    padding:14px 16px 4px;
+    display:flex;
+    gap:8px;
+  }
+  .controls input[type=text]{
+    flex:1;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-size:.92rem;
+    background:var(--panel);
+  }
+  .controls button{
+    background:var(--slate);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:.85rem;
+    font-weight:600;
+  }
+  .filters{
+    display:flex;
+    gap:6px;
+    padding:10px 16px 6px;
+    overflow-x:auto;
+  }
+  .filters button{
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:999px;
+    padding:6px 13px;
+    font-size:.78rem;
+    white-space:nowrap;
+  }
+  .filters button.active{
+    background:var(--slate-dark);
+    color:#fff;
+    border-color:var(--slate-dark);
+  }
+  #list{padding:8px 16px 0;}
+  .item{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 14px;
+    margin-bottom:10px;
+  }
+  .item.low{border-color:var(--red);background:var(--red-bg);}
+  .item.mid{border-color:var(--amber);background:var(--amber-bg);}
+  .item-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .item-name{
+    font-weight:700;
+    font-size:.97rem;
+    line-height:1.3;
+  }
+  .item-no{color:#8a8577;font-size:.72rem;font-weight:600;margin-right:6px;}
+  .badge{
+    font-size:.68rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.low{background:var(--red);color:#fff;}
+  .badge.mid{background:var(--amber);color:#fff;}
+  .badge.ok{background:var(--green-bg);color:var(--green);}
+  .item-meta{
+    font-size:.78rem;
+    color:#6b6656;
+    margin-top:3px;
+  }
+  .qty-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+  }
+  .qty-value{
+    font-size:1.3rem;
+    font-weight:700;
+    min-width:44px;
+    text-align:center;
+  }
+  .qty-btn{
+    width:38px;height:38px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-size:1.2rem;
+    font-weight:700;
+    line-height:1;
+  }
+  .qty-btn.plus{color:var(--green);}
+  .qty-btn.minus{color:var(--red);}
+  .item-actions{
+    margin-left:auto;
+    display:flex;
+    gap:6px;
+  }
+  .link-btn{
+    background:none;
+    border:none;
+    color:var(--slate);
+    font-size:.76rem;
+    text-decoration:underline;
+    padding:4px;
+  }
+  .log{
+    margin-top:8px;
+    border-top:1px dashed var(--line);
+    padding-top:8px;
+    font-size:.74rem;
+    color:#6b6656;
+  }
+  .log div{margin-bottom:2px;}
+  .empty{
+    text-align:center;
+    color:#8a8577;
+    padding:40px 20px;
+    font-size:.85rem;
+  }
+  .modal-bg{
+    position:fixed;inset:0;
+    background:rgba(30,28,22,.45);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:20;
+  }
+  .modal{
+    background:var(--panel);
+    width:100%;
+    max-width:480px;
+    border-radius:16px 16px 0 0;
+    padding:20px 18px 26px;
+  }
+  .modal h3{margin:0 0 14px;font-size:1.02rem;}
+  .modal label{
+    display:block;
+    font-size:.76rem;
+    color:#6b6656;
+    margin:10px 0 4px;
+  }
+  .modal input{
+    width:100%;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-size:.9rem;
+  }
+  .modal-actions{
+    display:flex;
+    gap:8px;
+    margin-top:18px;
+  }
+  .modal-actions button{
+    flex:1;
+    padding:11px;
+    border-radius:8px;
+    border:none;
+    font-weight:700;
+    font-size:.88rem;
+  }
+  .btn-cancel{background:var(--paper);color:var(--ink);border:1px solid var(--line) !important;}
+  .btn-confirm-in{background:var(--green);color:#fff;}
+  .btn-confirm-out{background:var(--red);color:#fff;}
+  #toast{
+    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+    background:var(--slate-dark);color:#fff;
+    padding:9px 16px;border-radius:20px;font-size:.8rem;
+    opacity:0;transition:opacity .25s;pointer-events:none;
+    z-index:30;
+  }
+  #toast.show{opacity:1;}
+</style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-emerald-600 p-2 rounded-lg shadow-md">
-                    <i class="fa-solid font-bold fa-boxes-stacked text-xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold leading-tight">ระบบคลังสินค้า & สโตร์</h1>
-                    <p class="text-xs text-slate-400">ระบบบันทึกแบบเรียลไทม์ (Real-time)</p>
-                </div>
-            </div>
-            
-            <!-- Admin PIN Status Badge -->
-            <div class="flex items-center space-x-2">
-                <button id="pinToggleBtn" onclick="openPinModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shadow-sm bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">
-                    <span id="pinStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span id="pinStatusText">โหมดดูอย่างเดียว</span>
-                    <i id="pinLockIcon" class="fa-solid fa-lock text-amber-400 ml-1"></i>
-                </button>
-            </div>
+<header>
+  <h1>ระบบจัดการสต็อก</h1>
+  <p>คลังวัสดุ-อุปกรณ์และของแห้ง · แตะรายการเพื่อรับเข้า/เบิกออก</p>
+  <div class="stats">
+    <div class="stat"><b id="statTotal">–</b><span>รายการทั้งหมด</span></div>
+    <div class="stat"><b id="statLow">–</b><span>ใกล้หมด</span></div>
+    <div class="stat"><b id="statZero">–</b><span>หมดสต็อก</span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="ค้นหาชื่อวัสดุ-อุปกรณ์...">
+  <button id="addBtn">+ เพิ่มรายการ</button>
+</div>
+<div class="filters">
+  <button class="active" data-filter="all">ทั้งหมด</button>
+  <button data-filter="low">ใกล้หมด/หมด</button>
+</div>
+
+<div id="list"></div>
+<div id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'stock-items-v1';
+const LOW_THRESHOLD = 3;
+
+const seedData = [
+["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21,"10500 ชิ้น",""],
+["2","กล่องข้าว 3 ช่อง (150ชิ้น)",9,"11250 ชิ้น",""],
+["3","ข้าวสาร 5 kg. (มาบุญครอง)",7,"7 ชิ้น",""],
+["4","ผักกาดดอง (48 ซอง)",7,"32 ซอง",""],
+["5","ปลากรอบ (48 กระป๋อง)",12,"37 แพ็ค",""],
+["6","น้ำมัน",7,"7 ขวด",""],
+["7","น้ำมันหอย",6,"6 ขวด",""],
+["8","น้ำปลา",17,"17 แพ็ค",""],
+["9","พริกไทย",2,"2 ขวด",""],
+["10","น้ำตาลมิตรผล",0,"0 ชิ้น",""],
+["11","ซอสปรุงรสฉลากเขียว",0,"0 ชิ้น",""],
+["12","ซึ้งนึ่ง (ใหญ่)",1,"150 ชิ้น",""],
+["13","ตะแกรงตักข้าว (ใหญ่)",2,"300 ชิ้น",""],
+["14","ตะแกรงตักข้าว (เล็ก)",2,"300 ชิ้น",""],
+["15","กระทะ (ใหญ่)",2,"300 ชิ้น",""],
+["16","กระทะ (เล็ก)",2,"300 ชิ้น",""],
+["17","กระบวยตักสาคู",1,"150 ชิ้น",""],
+["18","ตะหลิว (ใหญ่)",1,"150 ชิ้น",""],
+["19","ตะหลิว (เล็ก)",2,"300 ชิ้น",""],
+["20","หัวแก๊สรังผึ้ง",1,"150 ชิ้น",""],
+["21","หม้อเบอร์ 50",8,"1200 ชิ้น",""],
+["22","หม้อเบอร์ 60",4,"",""],
+["23","หม้อไฟ",5,"",""],
+["24","ถ้วย+ชาม+ช้อน (กระเบื้อง)",2,"",""],
+["25","ถุงแกง",2,"",""],
+["26","ถุงขยะ",1,"",""],
+["27","ตระกร้า",50,"",""],
+["28","กระแป๋ง (#15)",2,"",""],
+["29","กระแป๋ง (#13)",6,"",""],
+["30","ถังคูลเลอร์น้ำสแตนเลส",2,"",""],
+["31","ถังดำ (พลาสติก)",1,"",""],
+["32","เครื่องบดเนื้อ (ใหญ่)",2,"",""],
+["33","เครื่องบดเนื้อ (เล็ก)",1,"",""],
+["34","ถังแก๊ส 48 kg (ใหญ่)",1,"",""],
+["35","เตาเคลื่อนที่ (ปป)",2,"",""],
+];
+
+let items = [];
+let activeFilter = 'all';
+let searchTerm = '';
+let modalTarget = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+async function loadItems(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      items = JSON.parse(raw);
+      return;
+    }
+  }catch(e){ /* not found yet or storage unavailable */ }
+  items = seedData.map((r,i)=>({
+    id: 'item-' + i,
+    no: r[0],
+    name: r[1],
+    qty: r[2],
+    note: r[3] || '',
+    unitHint: r[3] || '',
+    log: []
+  }));
+  await saveItems();
+}
+
+async function saveItems(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }catch(e){
+    console.error('save failed', e);
+    toast('บันทึกไม่สำเร็จ ลองอีกครั้ง');
+  }
+}
+
+function statusOf(qty){
+  if(qty <= 0) return 'low';
+  if(qty <= LOW_THRESHOLD) return 'mid';
+  return 'ok';
+}
+
+function render(){
+  const list = document.getElementById('list');
+  let filtered = items.filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  if(activeFilter === 'low'){
+    filtered = filtered.filter(it => statusOf(it.qty) !== 'ok');
+  }
+
+  document.getElementById('statTotal').textContent = items.length;
+  document.getElementById('statLow').textContent = items.filter(it=>statusOf(it.qty)==='mid').length;
+  document.getElementById('statZero').textContent = items.filter(it=>statusOf(it.qty)==='low').length;
+
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">ไม่พบรายการที่ค้นหา</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(it => {
+    const st = statusOf(it.qty);
+    const badgeText = st === 'low' ? 'หมดสต็อก' : st === 'mid' ? 'ใกล้หมด' : 'ปกติ';
+    const lastLogs = it.log.slice(-2).reverse();
+    return `
+    <div class="item ${st==='low'?'low':st==='mid'?'mid':''}">
+      <div class="item-top">
+        <div>
+          <span class="item-no">#${it.no}</span><span class="item-name">${escapeHtml(it.name)}</span>
+          ${it.unitHint ? `<div class="item-meta">≈ ${escapeHtml(it.unitHint)}</div>` : ''}
         </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl w-full mx-auto p-3 sm:p-4 space-y-4">
-
-        <!-- Banner Card Template (Inspired by attached image layout) -->
-        <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-white">
-            <div class="grid grid-cols-1 md:grid-cols-12 bg-slate-950 text-white min-h-[160px] relative">
-                <!-- Left Content Area -->
-                <div class="md:col-span-8 p-5 flex flex-col justify-center bg-black/80 backdrop-blur-sm z-10">
-                    <div class="flex items-center space-x-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                        <span>สโตร์โรงครัวเคลื่อนที่</span>
-                    </div>
-                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-wide uppercase leading-tight mb-1">
-                        มูลนิธิป่อเต็กตึ๊ง
-                    </h2>
-                    <p class="text-lg sm:text-xl font-bold text-slate-200 tracking-wider">
-                        POHTECK TUNG FOUNDATION
-                    </p>
-                    <p class="text-sm font-medium text-amber-300 mt-1">
-                        華僑報德善堂
-                    </p>
-                </div>
-
-                <!-- Right Artwork / Badge Area -->
-                <div class="md:col-span-4 bg-gradient-to-br from-red-700 via-red-600 to-amber-700 p-4 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-                    <div class="border-2 border-amber-300/60 p-3 rounded-lg bg-red-950/40 backdrop-blur-md shadow-inner text-center">
-                        <i class="fa-solid fa-hands-holding-child text-3xl text-amber-300 mb-1"></i>
-                        <h3 class="text-xs font-bold text-amber-200">หยั่งราก แผ่กิ่งก้านความดี</h3>
-                        <p class="text-[10px] text-red-100 mt-0.5">ช่วยชีวิต • รักษาชีวิต • สร้างชีวิต</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Action Buttons Grid (Style based on screenshot layout) -->
-            <div class="p-4 bg-slate-50 border-t border-slate-200">
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    <!-- Button 1: Items List -->
-                    <button onclick="switchTab('items')" id="btnTabItems" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-list-check text-lg"></i>
-                        <span>รายการสินค้า</span>
-                    </button>
-
-                    <!-- Button 2: Stock In -->
-                    <button onclick="openStockModal('IN')" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-arrow-down-left-and-arrow-up-right text-lg rotate-180"></i>
-                        <span>รับเข้า</span>
-                    </button>
-
-                    <!-- Button 3: Stock Out -->
-                    <button onclick="openStockModal('OUT')" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-hand-holding-hand text-lg"></i>
-                        <span>จ่ายออก</span>
-                    </button>
-
-                    <!-- Button 4: Inventory Summary -->
-                    <button onclick="switchTab('summary')" id="btnTabSummary" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-chart-pie text-lg"></i>
-                        <span>สรุปคลัง</span>
-                    </button>
-
-                    <!-- Button 5: Logs -->
-                    <button onclick="switchTab('logs')" id="btnTabLogs" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                        <span>ประวัติรายการ</span>
-                    </button>
-
-                    <!-- Button 6: Add Item (Requires Admin PIN) -->
-                    <button onclick="checkAdminAction(() => openAddItemModal())" class="action-btn flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-md active:scale-95 transition-all">
-                        <i class="fa-solid fa-plus-circle text-lg"></i>
-                        <span>เพิ่มสินค้าใหม่</span>
-                    </button>
-                </div>
-            </div>
+        <span class="badge ${st}">${badgeText}</span>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn minus" onclick="openModal('${it.id}','out')">−</button>
+        <div class="qty-value">${it.qty}</div>
+        <button class="qty-btn plus" onclick="openModal('${it.id}','in')">+</button>
+        <div class="item-actions">
+          <button class="link-btn" onclick="removeItem('${it.id}')">ลบ</button>
         </div>
+      </div>
+      ${lastLogs.length ? `<div class="log">${lastLogs.map(l=>`<div>${l.type==='in'?'รับเข้า':'เบิกออก'} ${l.amount} · ${escapeHtml(l.operator||'ไม่ระบุ')} · ${l.date}${l.note?' · '+escapeHtml(l.note):''}</div>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
 
-        <!-- Live Status Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">รายการรวม</p>
-                    <p id="statTotalItems" class="text-lg font-bold text-slate-800">0</p>
-                </div>
-                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <i class="fa-solid fa-cubes"></i>
-                </div>
-            </div>
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">ของต้องเติม</p>
-                    <p id="statLowStock" class="text-lg font-bold text-rose-600">0</p>
-                </div>
-                <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-            </div>
+function openModal(id, type){
+  modalTarget = { id, type };
+  const it = items.find(x=>x.id===id);
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'modalBg';
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>${type==='in'?'รับเข้า':'เบิกออก'}: ${escapeHtml(it.name)}</h3>
+      <label>จำนวน</label>
+      <input type="number" id="mAmount" min="1" value="1">
+      <label>ผู้ดำเนินการ</label>
+      <input type="text" id="mOperator" placeholder="ชื่อผู้ดำเนินการ">
+      <label>หมายเหตุ (ถ้ามี)</label>
+      <input type="text" id="mNote" placeholder="หมายเหตุ">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button class="${type==='in'?'btn-confirm-in':'btn-confirm-out'}" onclick="confirmModal()">ยืนยัน</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+}
 
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">รับเข้าวันนี้</p>
-                    <p id="statTodayIn" class="text-lg font-bold text-emerald-600">0</p>
-                </div>
-                <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <i class="fa-solid fa-circle-arrow-down"></i>
-                </div>
-            </div>
+function closeModal(){
+  const bg = document.getElementById('modalBg');
+  if(bg) bg.remove();
+  modalTarget = null;
+}
 
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-500 font-medium">เบิกออกวันนี้</p>
-                    <p id="statTodayOut" class="text-lg font-bold text-amber-600">0</p>
-                </div>
-                <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <i class="fa-solid fa-circle-arrow-up"></i>
-                </div>
-            </div>
-        </div>
+async function confirmModal(){
+  if(!modalTarget) return;
+  const amount = parseInt(document.getElementById('mAmount').value, 10);
+  const operator = document.getElementById('mOperator').value.trim();
+  const note = document.getElementById('mNote').value.trim();
+  if(!amount || amount <= 0){ toast('กรุณาใส่จำนวนที่ถูกต้อง'); return; }
 
-        <!-- TAB 1: ITEMS LIST VIEW -->
-        <section id="viewItems" class="space-y-3">
-            <!-- Search & Filter Controls -->
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-2">
-                <div class="relative flex-grow">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchInput" oninput="renderInventoryTable()" placeholder="ค้นชื่อสินค้า, รหัส หรือสถานที่จัดเก็บ..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div class="w-full sm:w-48">
-                    <select id="categoryFilter" onchange="renderInventoryTable()" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="ALL">ทุกหมวดหมู่</option>
-                        <option value="วัตถุดิบประกอบอาหาร">วัตถุดิบประกอบอาหาร</option>
-                        <option value="เครื่องปรุง / เครื่องดื่ม">เครื่องปรุง / เครื่องดื่ม</option>
-                        <option value="อุปกรณ์ / ภาชนะ">อุปกรณ์ / ภาชนะ</option>
-                        <option value="ของใช้ทั่วไป / เวชภัณฑ์">ของใช้ทั่วไป / เวชภัณฑ์</option>
-                    </select>
-                </div>
-            </div>
+  const it = items.find(x=>x.id===modalTarget.id);
+  if(modalTarget.type === 'out' && amount > it.qty){
+    toast('จำนวนเบิกมากกว่าคงเหลือ');
+    return;
+  }
+  it.qty += modalTarget.type === 'in' ? amount : -amount;
+  const today = new Date();
+  const dateStr = String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+String(today.getFullYear()+543).slice(-2);
+  it.log.push({ type: modalTarget.type, amount, operator, note, date: dateStr });
 
-            <!-- Items Table / Mobile Cards Container -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 text-xs uppercase">
-                            <tr>
-                                <th class="p-3">รหัส/ชื่อวัตถุดิบ</th>
-                                <th class="p-3">หมวดหมู่</th>
-                                <th class="p-3 text-center">คงเหลือ</th>
-                                <th class="p-3">สถานที่จัดเก็บ</th>
-                                <th class="p-3 text-center">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody" class="divide-y divide-slate-100">
-                            <!-- Dynamic Content Inserted Here -->
-                            <tr>
-                                <td colspan="5" class="p-8 text-center text-slate-400">
-                                    <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600 mb-2"></i>
-                                    <p>กำลังเชื่อมต่อข้อมูลคลังสินค้าแบบเรียลไทม์...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  await saveItems();
+  closeModal();
+  render();
+  toast(modalTarget.type==='in' ? 'รับเข้าเรียบร้อย' : 'เบิกออกเรียบร้อย');
+}
 
-        <!-- TAB 2: INVENTORY SUMMARY VIEW -->
-        <section id="viewSummary" class="hidden space-y-3">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center space-x-2">
-                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
-                    <span>รายการสินค้าที่มีจำนวนคงเหลือน้อยกว่าขั้นต่ำ</span>
-                </h3>
-                <div id="lowStockList" class="space-y-2">
-                    <!-- Low stock items will render here -->
-                </div>
-            </div>
+async function removeItem(id){
+  if(!confirm('ลบรายการนี้ออกจากคลัง?')) return;
+  items = items.filter(x=>x.id!==id);
+  await saveItems();
+  render();
+  toast('ลบรายการแล้ว');
+}
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center space-x-2">
-                    <i class="fa-solid fa-pie-chart text-emerald-600"></i>
-                    <span>สัดส่วนคลังสินค้าแยกตามหมวดหมู่</span>
-                </h3>
-                <div id="categorySummary" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Category stats rendered here -->
-                </div>
-            </div>
-        </section>
+document.getElementById('addBtn').addEventListener('click', () => {
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.id = 'modalBg';
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>เพิ่มรายการใหม่</h3>
+      <label>ชื่อวัสดุ-อุปกรณ์</label>
+      <input type="text" id="nName" placeholder="เช่น น้ำตาลทราย">
+      <label>จำนวนเริ่มต้น</label>
+      <input type="number" id="nQty" min="0" value="0">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-confirm-in" onclick="confirmAdd()">เพิ่ม</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+});
 
-        <!-- TAB 3: TRANSACTION LOGS VIEW -->
-        <section id="viewLogs" class="hidden space-y-3">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
-                        <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
-                        <span>ประวัติการรับเข้า - จ่ายออก</span>
-                    </h3>
-                    <span class="text-xs text-slate-500">เรียลไทม์ล่าสุด</span>
-                </div>
-                <div id="logsContainer" class="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
-                    <!-- Logs list -->
-                </div>
-            </div>
-        </section>
+async function confirmAdd(){
+  const name = document.getElementById('nName').value.trim();
+  const qty = parseInt(document.getElementById('nQty').value, 10) || 0;
+  if(!name){ toast('กรุณาใส่ชื่อรายการ'); return; }
+  const maxNo = items.reduce((m,it)=>Math.max(m, parseInt(it.no)||0), 0);
+  items.push({
+    id: 'item-' + Date.now(),
+    no: String(maxNo+1),
+    name, qty, note:'', unitHint:'', log: []
+  });
+  await saveItems();
+  closeModal();
+  render();
+  toast('เพิ่มรายการแล้ว');
+}
 
-    </main>
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
 
-    <!-- PIN Unlock Modal -->
-    <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all">
-            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fa-solid fa-key text-xl"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800">ยืนยันตัวตนผู้ดูแลระบบ</h3>
-            <p class="text-xs text-slate-500 mt-1 mb-4">ใส่รหัส PIN เพื่อปลดล็อกสิทธิ์บันทึก/ปรับแก้ไขข้อมูล <br><span class="text-emerald-600 font-semibold">(รหัสเริ่มต้นคือ: 1234)</span></p>
+document.querySelectorAll('.filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
 
-            <div class="mb-4">
-                <input type="password" id="pinInput" maxlength="6" placeholder="ระบุรหัส PIN..." class="w-full text-center text-xl font-bold tracking-widest py-3 px-4 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
-
-            <div class="flex space-x-2">
-                <button onclick="closePinModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50">ยกเลิก</button>
-                <button onclick="submitPin()" class="w-1/2 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow">ยืนยันรหัส</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stock Movement Modal (Stock In / Stock Out) -->
-    <div id="stockModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 id="stockModalTitle" class="text-lg font-bold text-slate-800">ทำรายการบันทึกคลัง</h3>
-                <button onclick="closeStockModal()" class="text-slate-400 hover:text-slate-600 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="stockForm" onsubmit="handleStockSubmit(event)" class="space-y-3">
-                <input type="hidden" id="stockType" value="IN">
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกรายการสินค้า <span class="text-rose-500">*</span></label>
-                    <select id="stockItemId" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวนที่ต้องการ <span class="text-rose-500">*</span></label>
-                    <input type="number" id="stockAmount" min="1" step="any" required placeholder="เช่น 10" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้ทำรายการ / ผู้เบิก <span class="text-rose-500">*</span></label>
-                    <input type="text" id="stockOperator" required placeholder="เช่น นายสมชาย (อาสาสมัคร)" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ / วัตถุประสงค์</label>
-                    <textarea id="stockNote" rows="2" placeholder="เช่น ประกอบอาหารมื้อกลางวัน หรือ รับบริจาคจากบริษัท..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-                </div>
-
-                <div class="pt-2 flex justify-end space-x-2 border-t border-slate-100">
-                    <button type="button" onclick="closeStockModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-medium text-sm">ยกเลิก</button>
-                    <button type="submit" id="stockSubmitBtn" class="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow">
-                        บันทึกรายการ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add / Edit Item Modal -->
-    <div id="itemModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 id="itemModalTitle" class="text-lg font-bold text-slate-800">เพิ่มรายการสินค้าใหม่</h3>
-                <button onclick="closeItemModal()" class="text-slate-400 hover:text-slate-600 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="itemForm" onsubmit="handleItemSubmit(event)" class="space-y-3">
-                <input type="hidden" id="editItemId" value="">
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสสินค้า</label>
-                        <input type="text" id="itemCode" placeholder="อัตโนมัติ" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดหมู่ <span class="text-rose-500">*</span></label>
-                        <select id="itemCategory" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="วัตถุดิบประกอบอาหาร">วัตถุดิบประกอบอาหาร</option>
-                            <option value="เครื่องปรุง / เครื่องดื่ม">เครื่องปรุง / เครื่องดื่ม</option>
-                            <option value="อุปกรณ์ / ภาชนะ">อุปกรณ์ / ภาชนะ</option>
-                            <option value="ของใช้ทั่วไป / เวชภัณฑ์">ของใช้ทั่วไป / เวชภัณฑ์</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อวัตถุดิบ/สินค้า <span class="text-rose-500">*</span></label>
-                    <input type="text" id="itemName" required placeholder="เช่น ข้าวสารเสาไห้ 5% (50 กก.)" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวนตั้งต้น <span class="text-rose-500">*</span></label>
-                        <input type="number" id="itemQty" min="0" step="any" required value="0" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วยนับ <span class="text-rose-500">*</span></label>
-                        <input type="text" id="itemUnit" required placeholder="กระสอบ, กล่อง" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">ขั้นต่ำ <span class="text-rose-500">*</span></label>
-                        <input type="number" id="itemMin" min="0" step="any" required value="5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">ตำแหน่งชั้นวาง/คลังเก็บ</label>
-                    <input type="text" id="itemLocation" placeholder="เช่น โซน A-1 / โซนเย็น" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="pt-2 flex justify-end space-x-2 border-t border-slate-100">
-                    <button type="button" onclick="closeItemModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-medium text-sm">ยกเลิก</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow">
-                        บันทึกข้อมูลสินค้า
-                    </button>
-                </div>
-            </form>
-        </div>
-";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "
-    </div>
-";
-        import { 
-            getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, getDocs 
-        } from "
-
-";
-
-        // Global environment setup
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'warehouse-app-poh-teck-tung';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "demo-api-key",
-                authDomain: "demo-app.firebaseapp.com",
-                projectId: "demo-app",
-                storageBucket: "demo-app.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "1:123456789:web:abcdef"
-            };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Path constants enforcing RULE 1
-        const INVENTORY_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'inventory_items');
-        const LOGS_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'inventory_logs');
-
-        // Application State
-        let currentUser = null;
-        let isAdminAuthorized = false;
-        const ADMIN_PIN = "1234"; // Default PIN passcode
-
-        let rawInventoryItems = [];
-        let rawLogs = [];
-
-        // Expose functions to Window scope for HTML onclick bindings
-        window.switchTab = switchTab;
-        window.openPinModal = openPinModal;
-        window.closePinModal = closePinModal;
-        window.submitPin = submitPin;
-        window.checkAdminAction = checkAdminAction;
-        window.openStockModal = openStockModal;
-        window.closeStockModal = closeStockModal;
-        window.handleStockSubmit = handleStockSubmit;
-        window.openAddItemModal = openAddItemModal;
-        window.openEditItemModal = openEditItemModal;
-        window.deleteItem = deleteItem;
-        window.closeItemModal = closeItemModal;
-        window.handleItemSubmit = handleItemSubmit;
-        window.renderInventoryTable = renderInventoryTable;
-
-        // Initialize Auth and Real-time Snapshot listeners
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth initialization error:", err);
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    setupRealtimeListeners();
-                }
-            });
-        });
-
-        // Setup real-time listeners for Firestore
-        function setupRealtimeListeners() {
-            if (!currentUser) return;
-
-            // Listen to Inventory Items
-            onSnapshot(INVENTORY_COLLECTION, (snapshot) => {
-                rawInventoryItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                // Seed sample data if database is empty initially
-                if (rawInventoryItems.length === 0) {
-                    seedSampleInventoryData();
-                    return;
-                }
-
-                updateDashboardStats();
-                renderInventoryTable();
-                renderSummaryView();
-                populateStockItemDropdown();
-            }, (error) => {
-                console.error("Error loading inventory items:", error);
-                showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลคลัง", "error");
-            });
-
-            // Listen to Movement Logs
-            onSnapshot(LOGS_COLLECTION, (snapshot) => {
-                rawLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                // Sort by timestamp descending
-                rawLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                renderLogsView();
-                updateDashboardStats();
-            }, (error) => {
-                console.error("Error loading logs:", error);
-            });
-        }
-
-        // Default Seeding Data for Mobile Kitchen Store
-        async function seedSampleInventoryData() {
-            const initialItems = [
-                { code: 'SKU-001', name: 'ข้าวสารเสาไห้ (กระสอบ 50 กก.)', category: 'วัตถุดิบประกอบอาหาร', quantity: 45, unit: 'กระสอบ', minStock: 10, location: 'คลังแห้ง A-1' },
-                { code: 'SKU-002', name: 'น้ำมันพืชมรกต 1 ลิตร', category: 'วัตถุดิบประกอบอาหาร', quantity: 8, unit: 'ลัง (12 ขวด)', minStock: 15, location: 'คลังแห้ง A-2' },
-                { code: 'SKU-003', name: 'น้ำปลาแท้ ตราคนแบกหัก', category: 'เครื่องปรุง / เครื่องดื่ม', quantity: 12, unit: 'ลัง', minStock: 5, location: 'คลังเครื่องปรุง B-1' },
-                { code: 'SKU-004', name: 'กล่องข้าวชานอ้อย 1 ช่อง', category: 'อุปกรณ์ / ภาชนะ', quantity: 30, unit: 'แพ็ค (100 ชิ้น)', minStock: 10, location: 'คลังภาชนะ C-1' },
-                { code: 'SKU-005', name: 'หน้ากากอนามัยอนามัย', category: 'ของใช้ทั่วไป / เวชภัณฑ์', quantity: 4, unit: 'กล่อง', minStock: 10, location: 'ตู้เวชภัณฑ์ D-1' }
-            ];
-
-            for (const item of initialItems) {
-                await addDoc(INVENTORY_COLLECTION, {
-                    ...item,
-                    updatedAt: Date.now(),
-                    updatedBy: 'System Admin'
-                });
-            }
-        }
-
-        // Tab View Navigator
-        function switchTab(tabName) {
-            document.getElementById('viewItems').classList.add('hidden');
-            document.getElementById('viewSummary').classList.add('hidden');
-            document.getElementById('viewLogs').classList.add('hidden');
-
-            document.getElementById('btnTabItems').classList.remove('ring-4', 'ring-emerald-300');
-            document.getElementById('btnTabSummary').classList.remove('ring-4', 'ring-emerald-300');
-            document.getElementById('btnTabLogs').classList.remove('ring-4', 'ring-emerald-300');
-
-            if (tabName === 'items') {
-                document.getElementById('viewItems').classList.remove('hidden');
-                document.getElementById('btnTabItems').classList.add('ring-4', 'ring-emerald-300');
-            } else if (tabName === 'summary') {
-                document.getElementById('viewSummary').classList.remove('hidden');
-                document.getElementById('btnTabSummary').classList.add('ring-4', 'ring-emerald-300');
-            } else if (tabName === 'logs') {
-                document.getElementById('viewLogs').classList.remove('hidden');
-                document.getElementById('btnTabLogs').classList.add('ring-4', 'ring-emerald-300');
-            }
-        }
-
-        // Admin Security PIN Validation
-        function openPinModal() {
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinModal').classList.remove('hidden');
-            document.getElementById('pinInput').focus();
-        }
-
-        function closePinModal() {
-            document.getElementById('pinModal').classList.add('hidden');
-        }
-
-        function submitPin() {
-            const inputPin = document.getElementById('pinInput').value.trim();
-            if (inputPin === ADMIN_PIN) {
-                isAdminAuthorized = true;
-                updateAdminBadgeUI();
-                closePinModal();
-                showToast("ปลดล็อกสิทธิ์ผู้ดูแลระบบเรียบร้อยแล้ว", "success");
-            } else {
-                showToast("รหัส PIN ไม่ถูกต้อง โปรดลองอีกครั้ง", "error");
-            }
-        }
-
-        function updateAdminBadgeUI() {
-            const dot = document.getElementById('pinStatusDot');
-            const text = document.getElementById('pinStatusText');
-            const icon = document.getElementById('pinLockIcon');
-            const btn = document.getElementById('pinToggleBtn');
-
-            if (isAdminAuthorized) {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-                text.innerText = "ผู้ดูแล (แก้ไขได้)";
-                icon.className = "fa-solid fa-lock-open text-emerald-400 ml-1";
-                btn.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950 border border-emerald-600 text-emerald-200 shadow-sm";
-            } else {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
-                text.innerText = "โหมดดูอย่างเดียว";
-                icon.className = "fa-solid fa-lock text-amber-400 ml-1";
-                btn.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 shadow-sm";
-            }
-
-            renderInventoryTable();
-        }
-
-        function checkAdminAction(callback) {
-            if (!isAdminAuthorized) {
-                openPinModal();
-            } else {
-                callback();
-            }
-        }
-
-        // Update Summary Indicators Bar
-        function updateDashboardStats() {
-            document.getElementById('statTotalItems').innerText = rawInventoryItems.length;
-
-            const lowStockItems = rawInventoryItems.filter(item => Number(item.quantity) <= Number(item.minStock));
-            document.getElementById('statLowStock').innerText = lowStockItems.length;
-
-            // Today start timestamp calculation
-            const startOfToday = new Date();
-            startOfToday.setHours(0,0,0,0);
-            const startOfTodayMs = startOfToday.getTime();
-
-            const todayLogs = rawLogs.filter(log => log.timestamp >= startOfTodayMs);
-            const todayInCount = todayLogs.filter(l => l.type === 'IN').reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-            const todayOutCount = todayLogs.filter(l => l.type === 'OUT').reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-
-            document.getElementById('statTodayIn').innerText = todayInCount;
-            document.getElementById('statTodayOut').innerText = todayOutCount;
-        }
-
-        // Render Inventory Main Table
-        function renderInventoryTable() {
-            const tableBody = document.getElementById('inventoryTableBody');
-            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            const categoryVal = document.getElementById('categoryFilter').value;
-
-            let filtered = rawInventoryItems.filter(item => {
-                const matchQuery = (item.name || '').toLowerCase().includes(searchKeyword) ||
-                                 (item.code || '').toLowerCase().includes(searchKeyword) ||
-                                 (item.location || '').toLowerCase().includes(searchKeyword);
-                c
+(async () => {
+  await loadItems();
+  render();
+})();
+</script>
+</body>
+</html>
