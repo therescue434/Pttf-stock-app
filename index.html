@@ -3,242 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pohtecktung Kitchen store¹QA</title>
+<title>ระบบจัดการสต็อก</title>
 <style>
   :root{
+    --red:#c0392b;
+    --red-dark:#a3311f;
     --ink:#232323;
-    --paper:#f6f4ee;
+    --paper:#f4f2ec;
     --panel:#ffffff;
-    --line:#e1ddd0;
-    --slate:#3d4f5c;
-    --slate-dark:#2a3740;
-    --amber:#c8791a;
-    --amber-bg:#fbeedd;
-    --red:#b23b2e;
-    --red-bg:#f8e6e2;
-    --green:#4c7a4f;
-    --green-bg:#e9f1e8;
+    --line:#e6e1d3;
+    --green:#3c9a5f;
+    --green-bg:#e5f4ea;
+    --amber:#d38a1f;
+    --amber-bg:#fdf1de;
+    --navy:#232f3e;
+    --muted:#8a8577;
     font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    padding-bottom:40px;
-  }
+  body{margin:0;background:var(--paper);color:var(--ink);padding-bottom:78px;}
+  
+  /* ปรับแต่งส่วน Header ด้านบนให้สวยงาม */
   header{
-    background:var(--slate-dark);
-    color:#f2efe6;
-    padding:22px 18px 20px;
-    position:sticky;
-    top:0;
-    z-index:5;
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    color:#fff;
+    padding:20px 16px 16px;
+    position:sticky;top:0;z-index:5;
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
   }
-  header h1{
-    margin:0 0 4px;
-    font-size:1.35rem;
-    font-weight:700;
-    letter-spacing:.2px;
+  .header-top{display:flex;align-items:center;gap:14px;}
+  .header-top img{
+    height:54px;width:54px;object-fit:cover;
+    border-radius:12px;background:#fff;padding:3px;flex:0 0 auto;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
   }
-  header p{
-    margin:0;
-    font-size:.82rem;
-    color:#c7cdd1;
+  header h1{margin:0;font-size:1.25rem;font-weight:800;line-height:1.2;}
+  header p{margin:3px 0 0;font-size:.8rem;color:#fce4e0;}
+  .top-actions{display:flex;gap:8px;margin-top:14px;}
+  .top-actions button{
+    flex:1;padding:11px 6px;border:none;border-radius:9px;
+    font-weight:700;font-size:.86rem;display:flex;align-items:center;justify-content:center;gap:5px;
+    cursor:pointer;
   }
-  .stats{
-    display:flex;
-    gap:10px;
-    margin-top:14px;
-    overflow-x:auto;
-  }
-  .stat{
-    background:rgba(255,255,255,.08);
-    border-radius:8px;
-    padding:8px 12px;
-    min-width:84px;
-    flex:0 0 auto;
-  }
-  .stat b{display:block;font-size:1.05rem;}
-  .stat span{font-size:.7rem;color:#c7cdd1;}
-  .controls{
-    padding:14px 16px 4px;
-    display:flex;
-    gap:8px;
-  }
+  .btn-in{background:var(--green);color:#fff;}
+  .btn-out{background:var(--amber);color:#fff;}
+  .btn-export{background:var(--navy);color:#fff;}
+
+  .controls{padding:14px 16px 4px;display:flex;gap:8px;}
   .controls input[type=text]{
-    flex:1;
-    padding:10px 12px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    font-size:.92rem;
-    background:var(--panel);
+    flex:1;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+    font-size:.9rem;background:var(--panel);
   }
-  .controls button{
-    background:var(--slate);
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    padding:10px 14px;
-    font-size:.85rem;
-    font-weight:600;
+
+  .stats{display:flex;gap:8px;padding:10px 16px 4px;overflow-x:auto;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:82px;flex:0 0 auto;}
+  .stat b{display:block;font-size:1.02rem;}
+  .stat span{font-size:.68rem;color:var(--muted);}
+
+  /* ปรับแต่งตารางรองรับคอลัมน์ใหม่ */
+  .table-wrap{margin:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:650px;}
+  thead th{
+    background:#f0ece0;color:#5c5748;font-weight:700;
+    padding:10px 6px;text-align:center;font-size:.72rem;
   }
-  .filters{
-    display:flex;
-    gap:6px;
-    padding:10px 16px 6px;
-    overflow-x:auto;
-  }
-  .filters button{
-    border:1px solid var(--line);
-    background:var(--panel);
-    color:var(--ink);
-    border-radius:999px;
-    padding:6px 13px;
-    font-size:.78rem;
-    white-space:nowrap;
-  }
-  .filters button.active{
-    background:var(--slate-dark);
-    color:#fff;
-    border-color:var(--slate-dark);
-  }
-  #list{padding:8px 16px 0;}
-  .item{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:13px 14px;
-    margin-bottom:10px;
-  }
-  .item.low{border-color:var(--red);background:var(--red-bg);}
-  .item.mid{border-color:var(--amber);background:var(--amber-bg);}
-  .item-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:8px;
-  }
-  .item-name{
-    font-weight:700;
-    font-size:.97rem;
-    line-height:1.3;
-  }
-  .item-no{color:#8a8577;font-size:.72rem;font-weight:600;margin-right:6px;}
-  .badge{
-    font-size:.68rem;
-    font-weight:700;
-    padding:2px 8px;
-    border-radius:999px;
-    white-space:nowrap;
-  }
-  .badge.low{background:var(--red);color:#fff;}
-  .badge.mid{background:var(--amber);color:#fff;}
+  thead th:first-child{text-align:left;padding-left:12px;}
+  tbody td{padding:9px 6px;text-align:center;border-top:1px solid var(--line);}
+  tbody td:first-child{text-align:left;padding-left:12px;font-weight:600;}
+  tbody tr:active{background:#faf8f2;}
+  .num-in{color:var(--green);font-weight:700;}
+  .num-out{color:var(--amber);font-weight:700;}
+  .badge{display:inline-block;padding:4px 9px;border-radius:999px;font-weight:700;font-size:.74rem;white-space:nowrap;}
   .badge.ok{background:var(--green-bg);color:var(--green);}
-  .item-meta{
-    font-size:.78rem;
-    color:#6b6656;
-    margin-top:3px;
+  .badge.mid{background:var(--amber-bg);color:var(--amber);}
+  .badge.low{background:#f8e6e2;color:var(--red);}
+  .row-name-sub{display:block;font-size:.66rem;font-weight:400;color:var(--muted);}
+  .del-x{color:var(--muted);font-size:.7rem;padding:2px 4px;cursor:pointer;background:none;border:none;}
+
+  .operator-text{font-weight:600;color:#2c3e50;}
+  .time-text{color:var(--muted);font-size:.7rem;}
+  .note-text{font-style:italic;color:#666;}
+
+  .section{margin:18px 16px 0;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .section-head h2{margin:0;font-size:.92rem;}
+  .clear-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-size:.75rem;font-weight:700;cursor:pointer;}
+  .log-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow-x:auto;}
+  .log-table table{font-size:.74rem;}
+  .log-table thead th{font-size:.65rem;}
+  .empty-log{padding:26px 12px;text-align:center;color:var(--muted);font-size:.8rem;}
+
+  .add-row{padding:14px 16px 0;}
+  .add-row button{width:100%;padding:11px;border-radius:99px;border:1px dashed var(--line);background:var(--panel);color:var(--red);font-weight:700;font-size:.84rem;cursor:pointer;}
+
+  .bottom-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--navy);display:flex;gap:1px;z-index:5;
   }
-  .qty-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-top:10px;
+  .bottom-bar button{
+    flex:1;background:var(--navy);color:#fff;border:none;padding:14px 8px;
+    font-size:.8rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
   }
-  .qty-value{
-    font-size:1.3rem;
-    font-weight:700;
-    min-width:44px;
-    text-align:center;
-  }
-  .qty-btn{
-    width:38px;height:38px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    background:var(--paper);
-    font-size:1.2rem;
-    font-weight:700;
-    line-height:1;
-  }
-  .qty-btn.plus{color:var(--green);}
-  .qty-btn.minus{color:var(--red);}
-  .item-actions{
-    margin-left:auto;
-    display:flex;
-    gap:6px;
-  }
-  .link-btn{
-    background:none;
-    border:none;
-    color:var(--slate);
-    font-size:.76rem;
-    text-decoration:underline;
-    padding:4px;
-  }
-  .log{
-    margin-top:8px;
-    border-top:1px dashed var(--line);
-    padding-top:8px;
-    font-size:.74rem;
-    color:#6b6656;
-  }
-  .log div{margin-bottom:2px;}
-  .empty{
-    text-align:center;
-    color:#8a8577;
-    padding:40px 20px;
-    font-size:.85rem;
-  }
-  .modal-bg{
-    position:fixed;inset:0;
-    background:rgba(30,28,22,.45);
-    display:flex;align-items:flex-end;justify-content:center;
-    z-index:20;
-  }
-  .modal{
-    background:var(--panel);
-    width:100%;
-    max-width:480px;
-    border-radius:16px 16px 0 0;
-    padding:20px 18px 26px;
-  }
+  .bottom-bar button:active{background:#1a232e;}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(30,28,22,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20;}
+  .modal{background:var(--panel);width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:20px 18px 26px;max-height:82vh;overflow-y:auto;}
   .modal h3{margin:0 0 14px;font-size:1.02rem;}
-  .modal label{
-    display:block;
-    font-size:.76rem;
-    color:#6b6656;
-    margin:10px 0 4px;
-  }
-  .modal input{
-    width:100%;
-    padding:9px 10px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    font-size:.9rem;
-  }
-  .modal-actions{
-    display:flex;
-    gap:8px;
-    margin-top:18px;
-  }
-  .modal-actions button{
-    flex:1;
-    padding:11px;
-    border-radius:8px;
-    border:none;
-    font-weight:700;
-    font-size:.88rem;
-  }
+  .modal label{display:block;font-size:.76rem;color:var(--muted);margin:10px 0 4px;}
+  .modal input,.modal select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);font-size:.9rem;background:#fff;}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;}
+  .modal-actions button{flex:1;padding:11px;border-radius:8px;border:none;font-weight:700;font-size:.88rem;cursor:pointer;}
   .btn-cancel{background:var(--paper);color:var(--ink);border:1px solid var(--line) !important;}
   .btn-confirm-in{background:var(--green);color:#fff;}
-  .btn-confirm-out{background:var(--red);color:#fff;}
+  .btn-confirm-out{background:var(--amber);color:#fff;}
+
   #toast{
-    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
-    background:var(--slate-dark);color:#fff;
-    padding:9px 16px;border-radius:20px;font-size:.8rem;
-    opacity:0;transition:opacity .25s;pointer-events:none;
-    z-index:30;
+    position:fixed;bottom:72px;left:50%;transform:translateX(-50%);
+    background:var(--navy);color:#fff;padding:9px 16px;border-radius:20px;font-size:.8rem;
+    opacity:0;transition:opacity .25s;pointer-events:none;z-index:30;
   }
   #toast.show{opacity:1;}
 </style>
@@ -246,72 +128,138 @@
 <body>
 
 <header>
-  <img src=https://www.google.com/search?client--ms-android-samsung-ss&hs--Pb1V&sca_esv--a930d1138e50c4d8&sxsrf--APpeQntfPV8qhParLI1lCv9-ZuopQepdXA:1790251351665&udm--2&fbs--ABfTbFX7dsxGYp-Rn_o6jFIOqImbYXEejboDHjaq0DfEGdt4Skt24eIbHI4JdCIfn04kBIGqkk3j1V81PHJ-IbHIvM_MOc0c0k8RlsKFnXeY36Hf_TnqAN8M5oG19cik6NVvI_dDt9_gUfRGQL_Aqh_-bKqPE4QKRD5hYvc3v7953lCrbf_uV7fFuCtGAL-_aI90ClEYkUcvfoaqd4uCncyqPDzpHFTdPR4mbR3jCnJTDJBejcYgW9IEccr23Wu8AThXKsr_WYrkyfTEcGy1xZYiUoan5MuNWXZaV1w7e1H-SkLwv1VgdLXXRiX28YeKr9C5Y85pTzTY&q--%E0%B8%9B%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%95%E0%B9%87%E0%B8%81%E0%B8%95%E0%B8%B6%E0%B9%8A%E0%B8%87&sa--X&ved--2ahUKEwjkp__-lYeXAxXBR2wGHbPpF4sQtKgLegQIExAB#sv--CAMSWRoyKhBlLVdEbHNUNXpOWnZ2UFFNMg5XRGxzVDV6Tlp2dlBRTToOWVNfeUxlMzNidFFSSU0gBCoXCgFzEhBlLVdEbHNUNXpOWnZ2UFFNGAEwATgASgQIARACGAcgl_vi1wZKCBACGAEgAigB>
-  <h1>ระบบจัดการสต็อก</h1>
-  <p>คลังวัสดุ-อุปกรณ์โรงครัว · แตะรายการเพื่อรับเข้า/เบิกออก</p>
-  <div class="stats">
-    <div class="stat"><b id="statTotal">–</b><span>รายการทั้งหมด</span></div>
-    <div class="stat"><b id="statLow">–</b><span>ใกล้หมด</span></div>
-    <div class="stat"><b id="statZero">–</b><span>หมดสต็อก</span></div>
+  <div class="header-top">
+    <!-- ใส่รูปภาพโลโก้ตรงนี้ -->
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwFwD5zPj66_vWJXhRXLg7aswaZy4VFv3nT9LdDPz8w7bp5OLVI5fC7kaA&s=10" alt="โลโก้กู้ภัย">
+    <div>
+      <h1>ระบบจัดการสต็อกวัสดุ-อุปกรณ์</h1>
+      <p>คลังอุปกรณ์ประกอบอาหาร / ทีมงานกู้ภัย</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="btn-in" onclick="openModal(null,'in')">＋ รับเข้า</button>
+    <button class="btn-out" onclick="openModal(null,'out')">－ เบิกออก</button>
+    <button class="btn-export" onclick="exportCsv()">⬇ Export</button>
   </div>
 </header>
 
 <div class="controls">
   <input type="text" id="search" placeholder="ค้นหาชื่อวัสดุ-อุปกรณ์...">
-  <button id="addBtn">+ เพิ่มรายการ</button>
-</div>
-<div class="filters">
-  <button class="active" data-filter="all">ทั้งหมด</button>
-  <button data-filter="low">ใกล้หมด/หมด</button>
 </div>
 
-<div id="list"></div>
+<div class="stats">
+  <div class="stat"><b id="statTotal">–</b><span>รายการทั้งหมด</span></div>
+  <div class="stat"><b id="statLow">–</b><span>ใกล้หมด</span></div>
+  <div class="stat"><b id="statZero">–</b><span>หมดสต็อก</span></div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่อรายการ</th>
+        <th>เริ่มต้น</th>
+        <th>รับเข้า</th>
+        <th>เบิกออก</th>
+        <th>คงเหลือ</th>
+        <th>ผู้ดำเนินการ (ชื่อ-รหัสกู้ภัย)</th>
+        <th>วันที่ / เวลา</th>
+        <th>หมายเหตุ</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+</div>
+
+<div class="add-row">
+  <button onclick="openAddModal()">+ เพิ่มรายการใหม่</button>
+</div>
+
+<div class="section">
+  <div class="section-head">
+    <h2>📜 ประวัติการรับเข้า-เบิกออก (Inventory Log)</h2>
+    <button class="clear-btn" onclick="clearLog()">ล้างประวัติทั้งหมด</button>
+  </div>
+  <div class="log-table">
+    <table>
+      <thead>
+        <tr>
+          <th>วันที่-เวลา</th>
+          <th>ชื่อรายการ</th>
+          <th>ประเภท</th>
+          <th>จำนวน</th>
+          <th>คงเหลือ</th>
+          <th>ผู้ดำเนินการ</th>
+          <th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody id="logBody"></tbody>
+    </table>
+    <div id="logEmpty" class="empty-log" style="display:none;">ยังไม่มีประวัติการทำรายการ</div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button onclick="saveGps()">📍 บันทึก GPS</button>
+  <button onclick="downloadLog()">⬇ ดาวน์โหลด Log</button>
+</div>
+
 <div id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'stock-items-v1';
+const STORAGE_KEY = 'stock-items-v3';
+const LOG_KEY = 'stock-log-v3';
 const LOW_THRESHOLD = 3;
 
 const seedData = [
-["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21,"10500 ชิ้น",""],
-["2","กล่องข้าว 3 ช่อง (150ชิ้น)",9,"11250 ชิ้น",""],
-["3","ข้าวสาร 5 kg. (มาบุญครอง)",7,"7 ชิ้น",""],
-["4","ผักกาดดอง (48 ซอง)",7,"32 ซอง",""],
-["5","ปลากรอบ (48 กระป๋อง)",12,"37 แพ็ค",""],
-["6","น้ำมัน",7,"7 ขวด",""],
-["7","น้ำมันหอย",6,"6 ขวด",""],
-["8","น้ำปลา",17,"17 แพ็ค",""],
-["9","พริกไทย",2,"2 ขวด",""],
-["10","น้ำตาลมิตรผล",0,"0 ชิ้น",""],
-["11","ซอสปรุงรสฉลากเขียว",0,"0 ชิ้น",""],
-["12","ซึ้งนึ่ง (ใหญ่)",1,"150 ชิ้น",""],
-["13","ตะแกรงตักข้าว (ใหญ่)",2,"300 ชิ้น",""],
-["14","ตะแกรงตักข้าว (เล็ก)",2,"300 ชิ้น",""],
-["15","กระทะ (ใหญ่)",2,"300 ชิ้น",""],
-["16","กระทะ (เล็ก)",2,"300 ชิ้น",""],
-["17","กระบวยตักสาคู",1,"150 ชิ้น",""],
-["18","ตะหลิว (ใหญ่)",1,"150 ชิ้น",""],
-["19","ตะหลิว (เล็ก)",2,"300 ชิ้น",""],
-["20","หัวแก๊สรังผึ้ง",1,"150 ชิ้น",""],
-["21","หม้อเบอร์ 50",8,"1200 ชิ้น",""],
-["22","หม้อเบอร์ 60",4,"",""],
-["23","หม้อไฟ",5,"",""],
-["24","ถ้วย+ชาม+ช้อน (กระเบื้อง)",2,"",""],
-["25","ถุงแกง",2,"",""],
-["26","ถุงขยะ",1,"",""],
-["27","ตระกร้า",50,"",""],
-["28","กระแป๋ง (#15)",2,"",""],
-["29","กระแป๋ง (#13)",6,"",""],
-["30","ถังคูลเลอร์น้ำสแตนเลส",2,"",""],
-["31","ถังดำ (พลาสติก)",1,"",""],
-["32","เครื่องบดเนื้อ (ใหญ่)",2,"",""],
-["33","เครื่องบดเนื้อ (เล็ก)",1,"",""],
-["34","ถังแก๊ส 48 kg (ใหญ่)",1,"",""],
-["35","เตาเคลื่อนที่ (ปป)",2,"",""],
+["1","กล่องข้าว 1 ช่อง (500ชิ้น)",21],
+["2","กล่องข้าว 3 ช่อง (150ชิ้น)",9],
+["3","ข้าวสาร 5 kg. (มาบุญครอง)",7],
+["4","ผักกาดดอง (48 ซอง)",7],
+["5","ปลากรอบ (48 กระป๋อง)",12],
+["6","น้ำมัน",7],
+["7","น้ำมันหอย",6],
+["8","น้ำปลา",17],
+["9","พริกไทย",2],
+["10","น้ำตาลมิตรผล",0],
+["11","ซอสปรุงรสฉลากเขียว",0],
+["12","ซึ้งนึ่ง (ใหญ่)",1],
+["13","ตะแกรงตักข้าว (ใหญ่)",2],
+["14","ตะแกรงตักข้าว (เล็ก)",2],
+["15","กระทะ (ใหญ่)",2],
+["16","กระทะ (เล็ก)",2],
+["17","กระบวยตักสาคู",1],
+["18","ตะหลิว (ใหญ่)",1],
+["19","ตะหลิว (เล็ก)",2],
+["20","หัวแก๊สรังผึ้ง",1],
+["21","หม้อเบอร์ 50",8],
+["22","หม้อเบอร์ 60",4],
+["23","หม้อไฟ",5],
+["24","ถ้วย+ชาม+ช้อน (กระเบื้อง)",2],
+["25","ถุงแกง",2],
+["26","ถุงขยะ",1],
+["27","ตระกร้า",50],
+["28","กระแป๋ง (#15)",2],
+["29","กระแป๋ง (#13)",6],
+["30","ถังคูลเลอร์น้ำสแตนเลส",2],
+["31","ถังดำ (พลาสติก)",1],
+["32","เครื่องบดเนื้อ (ใหญ่)",2],
+["33","เครื่องบดเนื้อ (เล็ก)",1],
+["34","ถังแก๊ส 48 kg (ใหญ่)",1],
+["35","เตาเคลื่อนที่ (ปป)",2],
 ];
 
+const STORE = {
+  async get(key){
+    try{ return localStorage.getItem(key); }
+    catch(e){ return null; }
+  },
+  async set(key, value){ localStorage.setItem(key, value); }
+};
+
 let items = [];
-let activeFilter = 'all';
+let log = [];
 let searchTerm = '';
 let modalTarget = null;
 
@@ -319,105 +267,119 @@ function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 1600);
+  setTimeout(()=>t.classList.remove('show'), 1700);
 }
 
-async function loadItems(){
+function nowStr(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()+543).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function loadAll(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      items = JSON.parse(raw);
-      return;
+    const res = await STORE.get(STORAGE_KEY);
+    if(res) items = JSON.parse(res);
+    else { 
+      items = seedData.map((r,i)=>({
+        id:'item-'+i, 
+        no:r[0], 
+        name:r[1], 
+        initialQty:r[2], 
+        totalIn:0, 
+        totalOut:0,
+        lastOperator: '-',
+        lastUpdated: '-',
+        lastNote: '-'
+      })); 
+      await saveItems(); 
     }
-  }catch(e){ /* not found yet or storage unavailable */ }
-  items = seedData.map((r,i)=>({
-    id: 'item-' + i,
-    no: r[0],
-    name: r[1],
-    qty: r[2],
-    note: r[3] || '',
-    unitHint: r[3] || '',
-    log: []
-  }));
-  await saveItems();
-}
-
-async function saveItems(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }catch(e){
-    console.error('save failed', e);
-    toast('บันทึกไม่สำเร็จ ลองอีกครั้ง');
+    items = seedData.map((r,i)=>({
+      id:'item-'+i, 
+      no:r[0], 
+      name:r[1], 
+      initialQty:r[2], 
+      totalIn:0, 
+      totalOut:0,
+      lastOperator: '-',
+      lastUpdated: '-',
+      lastNote: '-'
+    }));
+    await saveItems();
   }
+  try{
+    const res2 = await STORE.get(LOG_KEY);
+    log = res2 ? JSON.parse(res2) : [];
+  }catch(e){ log = []; }
 }
+async function saveItems(){ try{ await STORE.set(STORAGE_KEY, JSON.stringify(items)); }catch(e){ toast('บันทึกไม่สำเร็จ'); } }
+async function saveLog(){ try{ await STORE.set(LOG_KEY, JSON.stringify(log)); }catch(e){ toast('บันทึกไม่สำเร็จ'); } }
 
-function statusOf(qty){
-  if(qty <= 0) return 'low';
-  if(qty <= LOW_THRESHOLD) return 'mid';
-  return 'ok';
-}
+function remaining(it){ return it.initialQty + it.totalIn - it.totalOut; }
+function statusOf(qty){ if(qty<=0) return 'low'; if(qty<=LOW_THRESHOLD) return 'mid'; return 'ok'; }
+function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function render(){
-  const list = document.getElementById('list');
-  let filtered = items.filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  if(activeFilter === 'low'){
-    filtered = filtered.filter(it => statusOf(it.qty) !== 'ok');
-  }
+  const body = document.getElementById('itemsBody');
+  const filtered = items.filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   document.getElementById('statTotal').textContent = items.length;
-  document.getElementById('statLow').textContent = items.filter(it=>statusOf(it.qty)==='mid').length;
-  document.getElementById('statZero').textContent = items.filter(it=>statusOf(it.qty)==='low').length;
+  document.getElementById('statLow').textContent = items.filter(it=>statusOf(remaining(it))==='mid').length;
+  document.getElementById('statZero').textContent = items.filter(it=>statusOf(remaining(it))==='low').length;
 
-  if(filtered.length === 0){
-    list.innerHTML = '<div class="empty">ไม่พบรายการที่ค้นหา</div>';
-    return;
-  }
-
-  list.innerHTML = filtered.map(it => {
-    const st = statusOf(it.qty);
-    const badgeText = st === 'low' ? 'หมดสต็อก' : st === 'mid' ? 'ใกล้หมด' : 'ปกติ';
-    const lastLogs = it.log.slice(-2).reverse();
-    return `
-    <div class="item ${st==='low'?'low':st==='mid'?'mid':''}">
-      <div class="item-top">
-        <div>
-          <span class="item-no">#${it.no}</span><span class="item-name">${escapeHtml(it.name)}</span>
-          ${it.unitHint ? `<div class="item-meta">≈ ${escapeHtml(it.unitHint)}</div>` : ''}
-        </div>
-        <span class="badge ${st}">${badgeText}</span>
-      </div>
-      <div class="qty-row">
-        <button class="qty-btn minus" onclick="openModal('${it.id}','out')">−</button>
-        <div class="qty-value">${it.qty}</div>
-        <button class="qty-btn plus" onclick="openModal('${it.id}','in')">+</button>
-        <div class="item-actions">
-          <button class="link-btn" onclick="removeItem('${it.id}')">ลบ</button>
-        </div>
-      </div>
-      ${lastLogs.length ? `<div class="log">${lastLogs.map(l=>`<div>${l.type==='in'?'รับเข้า':'เบิกออก'} ${l.amount} · ${escapeHtml(l.operator||'ไม่ระบุ')} · ${l.date}${l.note?' · '+escapeHtml(l.note):''}</div>`).join('')}</div>` : ''}
-    </div>`;
+  body.innerHTML = filtered.map(it=>{
+    const rem = remaining(it);
+    const st = statusOf(rem);
+    return `<tr>
+      <td>${escapeHtml(it.name)}<span class="row-name-sub">#${it.no}</span></td>
+      <td>${it.initialQty}</td>
+      <td class="num-in">${it.totalIn}</td>
+      <td class="num-out">${it.totalOut}</td>
+      <td><span class="badge ${st}">${rem}</span></td>
+      <td class="operator-text">${escapeHtml(it.lastOperator || '-')}</td>
+      <td class="time-text">${escapeHtml(it.lastUpdated || '-')}</td>
+      <td class="note-text">${escapeHtml(it.lastNote || '-')}</td>
+      <td><button class="del-x" onclick="removeItem('${it.id}')">✕</button></td>
+    </tr>`;
   }).join('');
+
+  const logBody = document.getElementById('logBody');
+  const logEmpty = document.getElementById('logEmpty');
+  if(log.length===0){
+    logBody.innerHTML = '';
+    logEmpty.style.display = 'block';
+  }else{
+    logEmpty.style.display = 'none';
+    logBody.innerHTML = log.slice().reverse().slice(0,50).map(l=>`
+      <tr>
+        <td>${l.datetime}</td>
+        <td style="text-align:left;padding-left:10px;">${escapeHtml(l.name)}</td>
+        <td>${l.type==='in'?'รับเข้า':'เบิกออก'}</td>
+        <td>${l.amount}</td>
+        <td>${l.remainingAfter}</td>
+        <td>${escapeHtml(l.operator || '-')}</td>
+        <td>${escapeHtml(l.note || '-')}</td>
+      </tr>`).join('');
+  }
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-function openModal(id, type){
-  modalTarget = { id, type };
-  const it = items.find(x=>x.id===id);
+function openModal(itemId, type){
+  modalTarget = { itemId, type };
+  const options = items.map(it=>`<option value="${it.id}" ${it.id===itemId?'selected':''}>${escapeHtml(it.name)}</option>`).join('');
   const bg = document.createElement('div');
-  bg.className = 'modal-bg';
-  bg.id = 'modalBg';
+  bg.className = 'modal-bg'; bg.id = 'modalBg';
   bg.innerHTML = `
     <div class="modal">
-      <h3>${type==='in'?'รับเข้า':'เบิกออก'}: ${escapeHtml(it.name)}</h3>
+      <h3>${type==='in'?'รับเข้า':'เบิกออก'}</h3>
+      <label>รายการ</label>
+      <select id="mItem">${options}</select>
       <label>จำนวน</label>
       <input type="number" id="mAmount" min="1" value="1">
-      <label>ผู้ดำเนินการ</label>
-      <input type="text" id="mOperator" placeholder="ชื่อผู้ดำเนินการ">
+      <label>ชื่อ-รหัสกู้ภัย ผู้ดำเนินการ</label>
+      <input type="text" id="mOperator" placeholder="เช่น นายกู้ภัย ใจดี (รหัส 401)">
       <label>หมายเหตุ (ถ้ามี)</label>
-      <input type="text" id="mNote" placeholder="หมายเหตุ">
+      <input type="text" id="mNote" placeholder="ระบุเพิ่มเติม...">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
         <button class="${type==='in'?'btn-confirm-in':'btn-confirm-out'}" onclick="confirmModal()">ยืนยัน</button>
@@ -425,48 +387,40 @@ function openModal(id, type){
     </div>`;
   document.body.appendChild(bg);
 }
-
-function closeModal(){
-  const bg = document.getElementById('modalBg');
-  if(bg) bg.remove();
-  modalTarget = null;
-}
+function closeModal(){ const bg=document.getElementById('modalBg'); if(bg) bg.remove(); modalTarget=null; }
 
 async function confirmModal(){
   if(!modalTarget) return;
-  const amount = parseInt(document.getElementById('mAmount').value, 10);
+  const itemId = document.getElementById('mItem').value;
+  const amount = parseInt(document.getElementById('mAmount').value,10);
   const operator = document.getElementById('mOperator').value.trim();
   const note = document.getElementById('mNote').value.trim();
-  if(!amount || amount <= 0){ toast('กรุณาใส่จำนวนที่ถูกต้อง'); return; }
 
-  const it = items.find(x=>x.id===modalTarget.id);
-  if(modalTarget.type === 'out' && amount > it.qty){
-    toast('จำนวนเบิกมากกว่าคงเหลือ');
-    return;
-  }
-  it.qty += modalTarget.type === 'in' ? amount : -amount;
-  const today = new Date();
-  const dateStr = String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+String(today.getFullYear()+543).slice(-2);
-  it.log.push({ type: modalTarget.type, amount, operator, note, date: dateStr });
+  if(!amount || amount<=0){ toast('กรุณาใส่จำนวนที่ถูกต้อง'); return; }
+  if(!operator){ toast('กรุณาระบุ ชื่อ-รหัสกู้ภัย'); return; }
 
-  await saveItems();
-  closeModal();
-  render();
-  toast(modalTarget.type==='in' ? 'รับเข้าเรียบร้อย' : 'เบิกออกเรียบร้อย');
+  const it = items.find(x=>x.id===itemId);
+  const type = modalTarget.type;
+  if(type==='out' && amount > remaining(it)){ toast('จำนวนเบิกมากกว่าคงเหลือ'); return; }
+
+  if(type==='in') it.totalIn += amount; else it.totalOut += amount;
+  
+  const currentTime = nowStr();
+  it.lastOperator = operator;
+  it.lastUpdated = currentTime;
+  it.lastNote = note || '-';
+
+  const rem = remaining(it);
+  log.push({ datetime: currentTime, name: it.name, type, amount, operator, note, remainingAfter: rem });
+  
+  await saveItems(); await saveLog();
+  closeModal(); render();
+  toast(type==='in' ? 'รับเข้าเรียบร้อย' : 'เบิกออกเรียบร้อย');
 }
 
-async function removeItem(id){
-  if(!confirm('ลบรายการนี้ออกจากคลัง?')) return;
-  items = items.filter(x=>x.id!==id);
-  await saveItems();
-  render();
-  toast('ลบรายการแล้ว');
-}
-
-document.getElementById('addBtn').addEventListener('click', () => {
+function openAddModal(){
   const bg = document.createElement('div');
-  bg.className = 'modal-bg';
-  bg.id = 'modalBg';
+  bg.className = 'modal-bg'; bg.id = 'modalBg';
   bg.innerHTML = `
     <div class="modal">
       <h3>เพิ่มรายการใหม่</h3>
@@ -474,48 +428,92 @@ document.getElementById('addBtn').addEventListener('click', () => {
       <input type="text" id="nName" placeholder="เช่น น้ำตาลทราย">
       <label>จำนวนเริ่มต้น</label>
       <input type="number" id="nQty" min="0" value="0">
+      <label>ชื่อ-รหัสกู้ภัย ผู้ดำเนินการ</label>
+      <input type="text" id="nOperator" placeholder="เช่น นายกู้ภัย ใจดี (รหัส 401)">
+      <label>หมายเหตุ</label>
+      <input type="text" id="nNote" placeholder="ระบุเพิ่มเติม...">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
         <button class="btn-confirm-in" onclick="confirmAdd()">เพิ่ม</button>
       </div>
     </div>`;
   document.body.appendChild(bg);
-});
-
+}
 async function confirmAdd(){
   const name = document.getElementById('nName').value.trim();
-  const qty = parseInt(document.getElementById('nQty').value, 10) || 0;
+  const qty = parseInt(document.getElementById('nQty').value,10) || 0;
+  const operator = document.getElementById('nOperator').value.trim();
+  const note = document.getElementById('nNote').value.trim();
+
   if(!name){ toast('กรุณาใส่ชื่อรายการ'); return; }
+
   const maxNo = items.reduce((m,it)=>Math.max(m, parseInt(it.no)||0), 0);
-  items.push({
-    id: 'item-' + Date.now(),
-    no: String(maxNo+1),
-    name, qty, note:'', unitHint:'', log: []
+  items.push({ 
+    id:'item-'+Date.now(), 
+    no:String(maxNo+1), 
+    name, 
+    initialQty:qty, 
+    totalIn:0, 
+    totalOut:0,
+    lastOperator: operator || '-',
+    lastUpdated: nowStr(),
+    lastNote: note || '-'
   });
-  await saveItems();
-  closeModal();
-  render();
+
+  await saveItems(); closeModal(); render();
   toast('เพิ่มรายการแล้ว');
 }
 
-document.getElementById('search').addEventListener('input', e => {
-  searchTerm = e.target.value;
-  render();
-});
+async function removeItem(id){
+  if(!confirm('ลบรายการนี้ออกจากคลัง?')) return;
+  items = items.filter(x=>x.id!==id);
+  await saveItems(); render();
+  toast('ลบรายการแล้ว');
+}
 
-document.querySelectorAll('.filters button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
-    render();
+async function clearLog(){
+  if(!confirm('ล้างประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
+  log = [];
+  await saveLog(); render();
+  toast('ล้างประวัติแล้ว');
+}
+
+function exportCsv(){
+  let csv = '\uFEFFลำดับ,ชื่อรายการ,เริ่มต้น,รับเข้า,เบิกออก,คงเหลือ,ผู้ดำเนินการ,วันที่-เวลา,หมายเหตุ\n';
+  items.forEach(it=>{ 
+    csv += `${it.no},"${it.name}",${it.initialQty},${it.totalIn},${it.totalOut},${remaining(it)},"${it.lastOperator || ''}","${it.lastUpdated || ''}","${it.lastNote || ''}"\n`; 
   });
-});
+  downloadBlob(csv, 'stock-export.csv');
+  toast('ดาวน์โหลด Export แล้ว');
+}
+function downloadLog(){
+  let csv = '\uFEFFวันที่-เวลา,ชื่อรายการ,ประเภท,จำนวน,ผู้ดำเนินการ,หมายเหตุ,คงเหลือ\n';
+  log.forEach(l=>{ csv += `${l.datetime},"${l.name}",${l.type==='in'?'รับเข้า':'เบิกออก'},${l.amount},"${l.operator||''}","${l.note||''}",${l.remainingAfter}\n`; });
+  downloadBlob(csv, 'stock-log.csv');
+  toast('ดาวน์โหลด Log แล้ว');
+}
+function downloadBlob(text, filename){
+  const blob = new Blob([text], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 
-(async () => {
-  await loadItems();
-  render();
-})();
+function saveGps(){
+  if(!navigator.geolocation){ toast('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
+  toast('กำลังค้นหาตำแหน่ง...');
+  navigator.geolocation.getCurrentPosition(
+    pos => toast(`บันทึกตำแหน่งแล้ว: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`),
+    () => toast('ไม่สามารถเข้าถึงตำแหน่งได้'),
+    { timeout: 8000 }
+  );
+}
+
+document.getElementById('search').addEventListener('input', e=>{ searchTerm=e.target.value; render(); });
+
+(async ()=>{ await loadAll(); render(); })();
 </script>
 </body>
 </html>
