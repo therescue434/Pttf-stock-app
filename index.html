@@ -207,7 +207,7 @@
   <div class="section-head">
     <h2>📜(Log)</h2>
     <div class="btn-action-group">
-      <button id="lockToggleBtn" class="unlock-btn" onclick="toggleLogLock()">🔒 แอดมินเท่านั้น Log</button>
+      <button id="lockToggleBtn" class="unlock-btn" onclick="toggleLogLock()">🔒สำหรับผู้ดูเเล Log</button>
       <button id="clearLogBtn" class="clear-btn" onclick="clearLogWithPass()" style="display:none;">ล้างประวัติ</button>
     </div>
   </div>
@@ -226,7 +226,8 @@
           <th>กิจกรรม</th>
           <th>ประเภท</th>
           <th>จำนวน</th>
-          <th>ผู้ดำเนินการ / IP Address</th>
+          <th>คงเหลือ</th>
+          <th>ผู้ดำเนินการ/IP Address</th>
           <th>หมายเหตุ</th>
         </tr>
       </thead>
@@ -515,7 +516,7 @@ function openModal(itemId, type){
       <select id="mItem">${options}</select>
       <label>จำนวน</label>
       <input type="number" id="mAmount" min="1" value="1">
-      <label>ชื่อ-รหัสกู้ภัย ผู้ดำเนินการ</label>
+      <label>ผู้ดำเนินการ</label>
       <input type="text" id="mOperator" placeholder="เช่น กู้ภัย 434">
       <label>หมายเหตุ (ถ้ามี)</label>
       <input type="text" id="mNote" placeholder="ระบุเพิ่มเติม...">
