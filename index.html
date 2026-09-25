@@ -162,7 +162,7 @@
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwFwD5zPj66_vWJXhRXLg7aswaZy4VFv3nT9LdDPz8w7bp5OLVI5fC7kaA&s=10" alt="โลโก้กู้ภัย">
     <div>
       <h1>PohTeckTung Foundation </h1>
-      <p>ระบบจัดการสต็อกวัสดุ-อุปกรณ์/ โรงครัวเคลื่อนที่ ใต้ 4-00 </p>
+      <p>สต็อกวัสดุ-อุปกรณ์/ โรงครัวเคลื่อนที่ ใต้ 4-00 </p>
     </div>
   </div>
   <div class="top-actions">
@@ -190,7 +190,8 @@
         <th>เบิกออก</th>
         <th>คงเหลือ</th>
         <th>จัดการ</th>
-        <th>ผู้ดำเนินการ (ชื่อ-รหัสกู้ภัย)</th>
+        <th>ผู้ดำเนินการ 
+(ชื่อหรือรหัสกู้ภัย)</th>
         <th>วันที่ / เวลา</th>
         <th>หมายเหตุ</th>
       </tr>
@@ -205,9 +206,9 @@
 
 <div class="section">
   <div class="section-head">
-    <h2>📜 ประวัติการรับเข้า-เบิกออก & เข้าชมระบบ (Log)</h2>
+    <h2>📜(Log)</h2>
     <div class="btn-action-group">
-      <button id="lockToggleBtn" class="unlock-btn" onclick="toggleLogLock()">🔒 ปลดล็อกเพื่อดู Log</button>
+      <button id="lockToggleBtn" class="unlock-btn" onclick="toggleLogLock()">🔒 แอดมินเท่านั้น Log</button>
       <button id="clearLogBtn" class="clear-btn" onclick="clearLogWithPass()" style="display:none;">ล้างประวัติ</button>
     </div>
   </div>
@@ -223,10 +224,9 @@
       <thead>
         <tr>
           <th>วันที่-เวลา</th>
-          <th>ชื่อรายการ / กิจกรรม</th>
+          <th>กิจกรรม</th>
           <th>ประเภท</th>
           <th>จำนวน</th>
-          <th>คงเหลือ</th>
           <th>ผู้ดำเนินการ / IP Address</th>
           <th>หมายเหตุ</th>
         </tr>
